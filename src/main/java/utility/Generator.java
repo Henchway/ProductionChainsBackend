@@ -69,7 +69,7 @@ public class Generator {
                 vocation = new Miner();
                 break;
             case 3:
-                vocation = new Sheperd();
+                vocation = new Shepherd();
                 break;
             case 4:
                 vocation = new Tanner();

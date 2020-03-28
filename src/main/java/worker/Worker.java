@@ -12,6 +12,7 @@ public class Worker extends Thread {
 
 
     // Program properties
+    public static final int population = 1000;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
     private final static int durationOfYear = 100;
@@ -26,6 +27,7 @@ public class Worker extends Thread {
     private char gender;
     private boolean isAlive;
     private Vocation vocation;
+    private boolean hasVocation;
     private boolean isAdult;
     private boolean criticalAge;
     private int health;
@@ -39,19 +41,6 @@ public class Worker extends Thread {
     /**
      * Worker gets born
      */
-//    public Worker() {
-//
-//        this.age = 1;
-//        this.gender = Generator.randomGender();
-//        this.vocation = null;
-//        this.isAlive = true;
-//        this.isAdult = false;
-//
-//    }
-
-    /**
-     * Worker gets created artificially
-     */
 
     public Worker() {
 
@@ -60,6 +49,7 @@ public class Worker extends Thread {
         this.name = selectName(gender);
         this.health = 75 + Generator.randomHealth();
         this.vocation = null;
+        this.hasVocation = false;
         this.isAdult = false;
         this.criticalAge = false;
         this.isAlive = true;
@@ -107,7 +97,8 @@ public class Worker extends Thread {
     Vocation chooseVocation() {
 
         Vocation vocation = Generator.randomVocation();
-        System.out.println(this + " has taken up the vocation of " + vocation);
+        hasVocation = true;
+//        System.out.println(this + " has taken up the vocation of " + vocation);
         return vocation;
 
     }
@@ -190,7 +181,7 @@ public class Worker extends Thread {
                 children.add(child);
                 getPartner().children.add(child);
                 child.start();
-                System.out.println("A new child has been born: " + child);
+//                System.out.println("A new child has been born: " + child);
 
             }
         }
@@ -201,8 +192,8 @@ public class Worker extends Thread {
     void workerDies() {
 
         isAlive = false;
-        System.out.println(ANSI_RED + this + " has died of old age in the year " + yearsPassed + ANSI_RESET);
-        System.out.println(obituary());
+//        System.out.println(ANSI_RED + this + " has died of old age in the year " + yearsPassed + ANSI_RESET);
+//        System.out.println(obituary());
 
         if (hasPartner()) {
             partner.setPartner(null);
@@ -240,6 +231,10 @@ public class Worker extends Thread {
 
     }
 
+
+    public boolean hasVocation() {
+        return hasVocation;
+    }
 
     public static ArrayList<Worker> getWorkersList() {
         return workersList;
@@ -295,7 +290,7 @@ public class Worker extends Thread {
 
     public void setPartner(Worker partner) {
         this.partner = partner;
-        System.out.println(this + " has found a partner: " + partner);
+//        System.out.println(this + " has found a partner: " + partner);
     }
 
 
@@ -324,8 +319,6 @@ public class Worker extends Thread {
     }
 
     public static void startPopulation() {
-
-        int population = 200;
 
         for (int i = 0; i < population; i++) {
 
