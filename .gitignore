@@ -1,1 +1,4 @@
 ﻿.idea
+target
+target/classes
+target/classes/gui
