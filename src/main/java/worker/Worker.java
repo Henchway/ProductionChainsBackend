@@ -1,4 +1,4 @@
-package workers;
+package worker;
 
 import utility.Generator;
 import vocation.Vocation;
@@ -310,7 +310,16 @@ public class Worker extends Thread {
                 "\t\tpartner =" + "\t\t" + partner;
     }
 
-    public static void main(String[] args) {
+    public static ArrayList<Worker> getWorkersList() {
+        return workersList;
+    }
+
+    public static int getYearsPassed() {
+        return yearsPassed;
+    }
+
+
+    public static void startPopulation() {
 
         int population = 200;
 
@@ -325,5 +334,7 @@ public class Worker extends Thread {
         startCalendar();
 
     }
+
+
 }
 
