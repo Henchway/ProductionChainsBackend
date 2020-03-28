@@ -3,16 +3,14 @@ package worker;
 import utility.Generator;
 import vocation.Vocation;
 
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Worker extends Thread {
 
 
     // Program properties
-    public static final int population = 1000;
+    public static final int population = 200;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
     private final static int durationOfYear = 100;
@@ -35,8 +33,10 @@ public class Worker extends Thread {
     private int fertility;
     private int childCounter;
     private int maxChildCounter;
-    private ArrayList<Worker> children;
-
+    private HashSet<Worker> children;
+    private HashSet<Worker> parents;
+    private HashSet<Worker> siblings;
+    private boolean migrated;
 
     /**
      * Worker gets born
@@ -56,6 +56,32 @@ public class Worker extends Thread {
         this.fertility = 70 + Generator.randomFertility();
         this.childCounter = 0;
         this.maxChildCounter = maxChildren();
+        this.children = new HashSet<>();
+        this.siblings = new HashSet<>();
+        this.parents = new HashSet<>();
+        this.migrated = false;
+        checkAdulthood();
+
+    }
+
+    public Worker(int age) {
+
+        this.age = age;
+        this.gender = Generator.randomGender();
+        this.name = selectName(gender);
+        this.health = 75 + Generator.randomHealth();
+        this.vocation = null;
+        this.hasVocation = false;
+        this.isAdult = false;
+        this.criticalAge = false;
+        this.isAlive = true;
+        this.fertility = 70 + Generator.randomFertility();
+        this.childCounter = 0;
+        this.maxChildCounter = maxChildren();
+        this.children = new HashSet<>();
+        this.siblings = new HashSet<>();
+        this.parents = new HashSet<>();
+        this.migrated = true;
         checkAdulthood();
 
     }
@@ -85,7 +111,6 @@ public class Worker extends Thread {
 
     int maxChildren() {
 
-        this.children = new ArrayList<>();
         if (gender == 'f') {
             return maxChildCounter = Generator.randomMaxChildCounter();
         } else {
@@ -139,10 +164,12 @@ public class Worker extends Thread {
 
                 if (!worker.hasPartner()
                         && worker.isAlive
-                        && Math.abs(worker.getHealth() - worker.getAge()) > 5 // Partners on the brink of death won't be chosen
+                        && Math.abs(worker.getHealth() - worker.getAge()) > 10 // Partners on the brink of death won't be chosen
                         && this.getGender() != worker.getGender()
                         && worker.getAge() > 15
-                        && (Math.abs(worker.age - this.age) < 20)) {
+                        && (Math.abs(worker.age - this.age) < 20)
+                        && !siblings.contains(worker)
+                        && !parents.contains(worker)) {
 
                     setPartner(worker);
                     worker.setPartner(this);
@@ -168,23 +195,63 @@ public class Worker extends Thread {
             if ((fertility + getPartner().fertility) / 2 > 80
                     && (age < 50 && getPartner().getAge() < 50)) {
 
-                assert age > 15;
-                assert getPartner().getAge() > 15;
-
+                mutex.lock();
                 Worker child = new Worker();
                 childCounter++;
-
-                mutex.lock();
                 workersList.add(child);
-                mutex.unlock();
 
                 children.add(child);
-                getPartner().children.add(child);
+                if (partner != null) {
+                    getPartner().children.add(child);
+                }
+
+                // Set parents of the children
+                child.parents.add(this);
+                child.parents.add(this.partner);
+
+                mutex.unlock();
+
+                // set the siblings
+                if (children.size() > 1) {
+
+                    mutex.lock();
+
+
+                    Iterator iterator = children.iterator();
+
+                    while(iterator.hasNext()) {
+
+                        Worker sibling = (Worker) iterator.next();
+                        HashSet<Worker> tempSiblings = new HashSet<>(children);
+                        tempSiblings.remove(sibling);
+                        sibling.siblings = tempSiblings;
+
+                    }
+
+                    mutex.unlock();
+                }
+
                 child.start();
 //                System.out.println("A new child has been born: " + child);
 
             }
         }
+
+    }
+
+    public static void workerMigrates() {
+
+        if (Generator.randomMigrationChance() >= 8) {
+
+            Worker worker = new Worker(Generator.randomAge());
+
+            mutex.lock();
+            workersList.add(worker);
+            mutex.unlock();
+            worker.start();
+
+        }
+
 
     }
 
@@ -318,6 +385,10 @@ public class Worker extends Thread {
         return yearsPassed;
     }
 
+    public boolean isMigrated() {
+        return migrated;
+    }
+
     public static void startPopulation() {
 
         for (int i = 0; i < population; i++) {
@@ -333,7 +404,6 @@ public class Worker extends Thread {
         startCalendar();
 
     }
-
 
 }
 

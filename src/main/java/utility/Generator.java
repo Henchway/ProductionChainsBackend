@@ -108,13 +108,17 @@ public class Generator {
 
     }
 
-    public static int randomMaxChildCounter() {
+    public static int randomMigrationChance() {
 
-        return random.nextInt(5);
+        return random.nextInt(11);
 
     }
 
+    public static int randomMaxChildCounter() {
 
+        return random.nextInt(6);
+
+    }
 
 
     public static List<String> readFileIntoList(String fileName) {

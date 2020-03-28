@@ -5,48 +5,63 @@ import worker.Worker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Statistics {
+public class Statistics extends Thread {
 
-    private static ArrayList<Worker> workersStatisticsList = new ArrayList<>();
-    private static long workersCount;
-    private static long femaleWorkersCount;
-    private static long maleWorkersCount;
-    private static HashMap<String, Integer> vocationMap;
+    private ArrayList<Worker> workersStatisticsList = new ArrayList<>();
+    private long workersCount;
+    private long femaleWorkersCount;
+    private long maleWorkersCount;
+    private long migratedWorkersCount;
+    private HashMap<String, Integer> vocationMap;
 
-    public static void generateWorkerStatistic() {
+    private void generateWorkerStatistics() {
 
         workersStatisticsList = new ArrayList<>(Worker.getWorkersList());
         workersCount = workersStatisticsList.size();
+
         femaleWorkersCount = workersStatisticsList.stream()
+                .filter(Objects::nonNull)
                 .filter(worker -> worker.getGender() == 'f')
                 .count();
+
+        migratedWorkersCount = workersStatisticsList.stream()
+                .filter(Objects::nonNull)
+                .filter(Worker::isMigrated)
+                .count();
+
         maleWorkersCount = workersCount - femaleWorkersCount;
         generateVocationMap();
 
     }
 
-    public static long getWorkerCount() {
+    public long getWorkerCount() {
         return workersCount;
     }
 
-    public static long getFemaleWorkersCount() {
+    public long getFemaleWorkersCount() {
         return femaleWorkersCount;
     }
 
-    public static long getMaleWorkersCount() {
+    public long getMaleWorkersCount() {
         return maleWorkersCount;
     }
 
-    public static HashMap<String, Integer> getVocationMap() {
+    public long getMigratedWorkersCount() {
+        return migratedWorkersCount;
+    }
+
+    public HashMap<String, Integer> getVocationMap() {
         return vocationMap;
     }
 
-    public static void generateVocationMap() {
+    public void generateVocationMap() {
 
         List<String> vocationList = workersStatisticsList.stream()
-                .filter(worker -> worker.hasVocation())
+                .filter(Objects::nonNull)
+                .filter(Worker::hasVocation)
                 .map(worker -> worker.getVocation().toString())
                 .collect(Collectors.toList());
 
@@ -65,10 +80,26 @@ public class Statistics {
                     vocationMap.put(s, 1);
                 }
 
-
             }
         }
 
     }
 
+    @Override
+    public void run() {
+
+        do {
+
+            generateWorkerStatistics();
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } while (workersCount > 0);
+
+
+    }
 }
