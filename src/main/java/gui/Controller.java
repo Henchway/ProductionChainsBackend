@@ -3,7 +3,9 @@ package gui;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import utility.Statistics;
 import worker.Worker;
+
 
 public class Controller {
 
@@ -27,17 +29,13 @@ public class Controller {
 
             @Override
             public void handle(long l) {
+
+                Statistics.generateWorkerStatistic();
                 labelYear.setText(String.valueOf(Worker.getYearsPassed()));
-                
-                labelPopulationSize.setText(String.valueOf(Worker.getWorkersList().size()));
+                labelPopulationSize.setText(String.valueOf(Statistics.getWorkerCount()));
+                labelFemaleWorkers.setText(String.valueOf(Statistics.getFemaleWorkersCount()));
+                labelMaleWorkers.setText(String.valueOf(Statistics.getMaleWorkersCount()));
 
-                labelFemaleWorkers.setText(String.valueOf(Worker.getWorkersList().stream()
-                        .filter(worker -> worker.getGender() == 'f')
-                        .count()));
-
-                labelMaleWorkers.setText(String.valueOf(Worker.getWorkersList().stream()
-                        .filter(worker -> worker.getGender() == 'm')
-                        .count()));
             }
         }.start();
 

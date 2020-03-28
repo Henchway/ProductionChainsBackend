@@ -12,28 +12,28 @@ public class Worker extends Thread {
 
 
     // Program properties
-    public final static int durationOfYear = 100;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
-    static ArrayList<Worker> workersList = new ArrayList<>();
-    static int yearsPassed = 0;
-    static Timer timer;
+    private final static int durationOfYear = 100;
+    private static ArrayList<Worker> workersList = new ArrayList<>();
+    private static int yearsPassed = 0;
+    private static Timer timer;
     private static ReentrantLock mutex = new ReentrantLock();
 
     // Worker properties
-    int age;
-    String name;
-    char gender;
-    boolean isAlive;
-    Vocation vocation;
-    boolean isAdult;
-    boolean criticalAge;
-    int health;
-    Worker partner;
-    int fertility;
-    int childCounter;
-    int maxChildCounter;
-    ArrayList<Worker> children;
+    private int age;
+    private String name;
+    private char gender;
+    private boolean isAlive;
+    private Vocation vocation;
+    private boolean isAdult;
+    private boolean criticalAge;
+    private int health;
+    private Worker partner;
+    private int fertility;
+    private int childCounter;
+    private int maxChildCounter;
+    private ArrayList<Worker> children;
 
 
     /**
@@ -146,7 +146,9 @@ public class Worker extends Thread {
 
             for (Worker worker : workersList) {
 
-                if (!worker.hasPartner() && worker.isAlive
+                if (!worker.hasPartner()
+                        && worker.isAlive
+                        && Math.abs(worker.getHealth() - worker.getAge()) > 5 // Partners on the brink of death won't be chosen
                         && this.getGender() != worker.getGender()
                         && worker.getAge() > 15
                         && (Math.abs(worker.age - this.age) < 20)) {
@@ -224,7 +226,6 @@ public class Worker extends Thread {
 
             workerAges();
             checkAdulthood();
-
             findPartner();
             workerProcreates();
             checkHealth();
@@ -240,10 +241,17 @@ public class Worker extends Thread {
     }
 
 
+    public static ArrayList<Worker> getWorkersList() {
+        return workersList;
+    }
+
     public int getAge() {
         return age;
     }
 
+    public int getHealth() {
+        return health;
+    }
 
     public char getGender() {
         return gender;
@@ -310,14 +318,10 @@ public class Worker extends Thread {
                 "\t\tpartner =" + "\t\t" + partner;
     }
 
-    public static ArrayList<Worker> getWorkersList() {
-        return workersList;
-    }
 
     public static int getYearsPassed() {
         return yearsPassed;
     }
-
 
     public static void startPopulation() {
 
@@ -326,7 +330,9 @@ public class Worker extends Thread {
         for (int i = 0; i < population; i++) {
 
             Worker worker = new Worker();
+            mutex.lock();
             workersList.add(worker);
+            mutex.unlock();
             worker.start();
 
         }

@@ -7,4 +7,6 @@ public abstract class Vocation {
         return this.getClass().getSimpleName();
     }
 
+
+
 }
