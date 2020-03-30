@@ -13,11 +13,12 @@ public class Worker extends Thread {
     public static final int population = 200;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
-    private final static int durationOfYear = 100;
+    private final static int durationOfYear = 500;
     private static ArrayList<Worker> workersList = new ArrayList<>();
     private static int yearsPassed = 0;
     private static Timer timer;
     private static ReentrantLock mutex = new ReentrantLock();
+
 
     // Worker properties
     private int age;
@@ -44,6 +45,10 @@ public class Worker extends Thread {
 
     public Worker() {
 
+        mutex.lock();
+        workersList.add(this);
+        mutex.unlock();
+
         this.age = 1;
         this.gender = Generator.randomGender();
         this.name = selectName(gender);
@@ -60,11 +65,18 @@ public class Worker extends Thread {
         this.siblings = new HashSet<>();
         this.parents = new HashSet<>();
         this.migrated = false;
-        checkAdulthood();
 
     }
 
+    /**
+     * Worker migrates to the village
+     * @param age
+     */
     public Worker(int age) {
+
+        mutex.lock();
+        workersList.add(this);
+        mutex.unlock();
 
         this.age = age;
         this.gender = Generator.randomGender();
@@ -195,12 +207,11 @@ public class Worker extends Thread {
             if ((fertility + getPartner().fertility) / 2 > 80
                     && (age < 50 && getPartner().getAge() < 50)) {
 
-                mutex.lock();
                 Worker child = new Worker();
                 childCounter++;
-                workersList.add(child);
-
                 children.add(child);
+
+                mutex.lock();
                 if (partner != null) {
                     getPartner().children.add(child);
                 }
@@ -219,7 +230,7 @@ public class Worker extends Thread {
 
                     Iterator iterator = children.iterator();
 
-                    while(iterator.hasNext()) {
+                    while (iterator.hasNext()) {
 
                         Worker sibling = (Worker) iterator.next();
                         HashSet<Worker> tempSiblings = new HashSet<>(children);
@@ -241,17 +252,16 @@ public class Worker extends Thread {
 
     public static void workerMigrates() {
 
-        if (Generator.randomMigrationChance() >= 8) {
+        for (int i = 0; i < Generator.randomMigrationRate(); i++) {
 
-            Worker worker = new Worker(Generator.randomAge());
+            if (Generator.randomMigrationChance() >= 8) {
 
-            mutex.lock();
-            workersList.add(worker);
-            mutex.unlock();
-            worker.start();
+                Worker worker = new Worker(Generator.randomAge());
+                worker.start();
+
+            }
 
         }
-
 
     }
 
@@ -389,15 +399,15 @@ public class Worker extends Thread {
         return migrated;
     }
 
+    public static int getDurationOfYear() {
+        return durationOfYear;
+    }
+
     public static void startPopulation() {
 
         for (int i = 0; i < population; i++) {
 
-            Worker worker = new Worker();
-            mutex.lock();
-            workersList.add(worker);
-            mutex.unlock();
-            worker.start();
+            new Worker().start();
 
         }
 

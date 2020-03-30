@@ -1,14 +1,18 @@
 package gui;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import utility.Statistics;
 import worker.Worker;
 
-import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Controller {
@@ -47,41 +51,53 @@ public class Controller {
     private Label labelMigratedWorkers;
 
 
-    private static LineChart.Series lineChartSeries = new LineChart.Series<>();
+    private static XYChart.Series lineChartSeries = new XYChart.Series();
 
-//    private static ReentrantLock mutex = new ReentrantLock();
+    private static ReentrantLock mutex = new ReentrantLock();
 
     public void initialize() {
 
+        lineChartSeries.setName("Population Growth");
         Worker.startPopulation();
-        Statistics statistics = new Statistics();
+        Statistics statistics = Statistics.createStatistics();
         statistics.start();
+        lineChart.getData().add(lineChartSeries);
+        createTimer(statistics);
 
-        new AnimationTimer() {
+    }
 
+    void createTimer(Statistics statistics) {
+
+        TimerTask task = new TimerTask() {
             @Override
-            public void handle(long l) {
+            public void run() {
+                /* Note to self: https://stackoverflow.com/questions/13784333/platform-runlater-and-task-in-javafx
+                runLater übergibt den Task an den JavaFX Thread um Concurrency Issues zu verhindern.
+                Weiterer Vortei: Beim Animation Timer kann die Tick-Rate nicht beinflusst werden, bei gewöhnlichen Threads schon, bzw. speziell beim Timer ist das einfach.
+                 */
 
-                Worker.workerMigrates();
-                labelYear.setText(String.valueOf(Worker.getYearsPassed()));
-                labelPopulationSize.setText(String.valueOf(statistics.getWorkerCount()));
-                labelFemaleWorkers.setText(String.valueOf(statistics.getFemaleWorkersCount()));
-                labelMaleWorkers.setText(String.valueOf(statistics.getMaleWorkersCount()));
-                labelMigratedWorkers.setText(String.valueOf(statistics.getMigratedWorkersCount()));
+                Platform.runLater(() -> {
 
-                HashMap<String, Integer> vocationStatistics = statistics.getVocationMap();
-                labelHunters.setText(String.valueOf(vocationStatistics.get("Hunter")));
-                labelLumberjacks.setText(String.valueOf(vocationStatistics.get("Lumberjack")));
-                labelMiners.setText(String.valueOf(vocationStatistics.get("Miner")));
-                labelTanners.setText(String.valueOf(vocationStatistics.get("Tanner")));
-                labelShepherds.setText(String.valueOf(vocationStatistics.get("Shepherd")));
-                lineChartSeries.getData().add(new LineChart.Data<>(String.valueOf(Worker.getYearsPassed()), statistics.getWorkerCount()));
+                    Worker.workerMigrates();
+                    lineChartSeries.getData().add(new LineChart.Data<>(String.valueOf(Worker.getYearsPassed()), statistics.getWorkerCount()));
+                    labelYear.setText(String.valueOf(Worker.getYearsPassed()));
+                    labelPopulationSize.setText(String.valueOf(statistics.getWorkerCount()));
+                    labelFemaleWorkers.setText(String.valueOf(statistics.getFemaleWorkerCount()));
+                    labelMaleWorkers.setText(String.valueOf(statistics.getMaleWorkerCount()));
+                    labelMigratedWorkers.setText(String.valueOf(statistics.getMigratedWorkerCount()));
+                    labelHunters.setText(String.valueOf(statistics.getVocationMap().get("Hunter")));
+                    labelLumberjacks.setText(String.valueOf(statistics.getVocationMap().get("Lumberjack")));
+                    labelMiners.setText(String.valueOf(statistics.getVocationMap().get("Miner")));
+                    labelTanners.setText(String.valueOf(statistics.getVocationMap().get("Tanner")));
+                    labelShepherds.setText(String.valueOf(statistics.getVocationMap().get("Shepherd")));
 
+                });
 
             }
-        }.start();
+        };
 
-        lineChart.getData().add(lineChartSeries);
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(task, 0, Worker.getDurationOfYear());
 
     }
 
@@ -91,6 +107,7 @@ public class Controller {
 
         lineChart.getData().clear();
         lineChartSeries = new LineChart.Series<>();
+        lineChartSeries.setName("Population Growth");
         lineChart.getData().add(lineChartSeries);
 
     }

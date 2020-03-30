@@ -1,6 +1,7 @@
 package utility;
 
 import vocation.*;
+import worker.Worker;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,11 +109,33 @@ public class Generator {
 
     }
 
+    /**
+     * Determines whether a migration happens
+     * @return
+     */
+
     public static int randomMigrationChance() {
 
         return random.nextInt(11);
 
     }
+
+    /**
+     * Determines how many settlers potentially migrate this year
+     * @return
+     */
+    public static int randomMigrationRate() {
+
+        if (Statistics.statistics == null) {
+            Statistics.createStatistics();
+        }
+
+        return random.nextInt((int) Statistics.statistics.getWorkerCount() / 100) + 1;
+
+    }
+
+
+
 
     public static int randomMaxChildCounter() {
 

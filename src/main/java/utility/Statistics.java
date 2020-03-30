@@ -6,18 +6,38 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class Statistics extends Thread {
 
     private ArrayList<Worker> workersStatisticsList = new ArrayList<>();
+    public static Statistics statistics;
     private long workersCount;
     private long femaleWorkersCount;
     private long maleWorkersCount;
     private long migratedWorkersCount;
     private HashMap<String, Integer> vocationMap;
+    private static ReentrantLock mutex = new ReentrantLock();
+
+    private Statistics() {
+    }
+
+    public static Statistics createStatistics() {
+
+        if (statistics == null) {
+
+            statistics = new Statistics();
+
+        }
+        return statistics;
+
+    }
+
 
     private void generateWorkerStatistics() {
+
+
 
         workersStatisticsList = new ArrayList<>(Worker.getWorkersList());
         workersCount = workersStatisticsList.size();
@@ -41,15 +61,15 @@ public class Statistics extends Thread {
         return workersCount;
     }
 
-    public long getFemaleWorkersCount() {
+    public long getFemaleWorkerCount() {
         return femaleWorkersCount;
     }
 
-    public long getMaleWorkersCount() {
+    public long getMaleWorkerCount() {
         return maleWorkersCount;
     }
 
-    public long getMigratedWorkersCount() {
+    public long getMigratedWorkerCount() {
         return migratedWorkersCount;
     }
 

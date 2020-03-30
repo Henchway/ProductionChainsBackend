@@ -19,10 +19,10 @@
                <children>
                   <LineChart fx:id="lineChart" title="Population Growth" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <xAxis>
-                        <CategoryAxis endMargin="100.0" side="BOTTOM" startMargin="0.0" />
+                        <CategoryAxis endMargin="100.0" label="Year" side="BOTTOM" startMargin="0.0" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis lowerBound="1000.0" minorTickCount="100" side="LEFT" tickLength="5.0" tickUnit="100.0" upperBound="3000.0" />
+                        <NumberAxis label="Population" lowerBound="1000.0" minorTickCount="100" side="LEFT" tickLength="5.0" tickUnit="100.0" upperBound="3000.0" />
                      </yAxis>
                   </LineChart>
                </children>
