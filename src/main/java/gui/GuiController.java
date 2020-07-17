@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import timeline.GameTimeline;
 import utility.Statistics;
 import worker.Worker;
 
@@ -15,7 +16,7 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class Controller {
+public class GuiController {
 
     @FXML
     private Label labelYear;
@@ -52,15 +53,17 @@ public class Controller {
 
 
     private static XYChart.Series lineChartSeries = new XYChart.Series();
-
-    private static ReentrantLock mutex = new ReentrantLock();
+    private GameTimeline gameTimeline;
+    private Statistics statistics;
 
     public void initialize() {
 
         lineChartSeries.setName("Population Growth");
-        Worker.startPopulation();
-        Statistics statistics = Statistics.createStatistics();
-        statistics.start();
+        this.gameTimeline = new GameTimeline(1000);
+        statistics = new Statistics(gameTimeline.workersList);
+        gameTimeline.setStatistics(statistics);
+        gameTimeline.startPopulation();
+        statistics.generateWorkerStatistics();
         lineChart.getData().add(lineChartSeries);
         createTimer(statistics);
 
@@ -76,11 +79,14 @@ public class Controller {
                 Weiterer Vortei: Beim Animation Timer kann die Tick-Rate nicht beinflusst werden, bei gewöhnlichen Threads schon, bzw. speziell beim Timer ist das einfach.
                  */
 
+
                 Platform.runLater(() -> {
 
-                    Worker.workerMigrates();
-                    lineChartSeries.getData().add(new LineChart.Data<>(String.valueOf(Worker.getYearsPassed()), statistics.getWorkerCount()));
-                    labelYear.setText(String.valueOf(Worker.getYearsPassed()));
+                    gameTimeline.setYearsPassed(gameTimeline.getYearsPassed() + 1);
+                    gameTimeline.processNewYear();
+
+                    lineChartSeries.getData().add(new LineChart.Data<>(String.valueOf(gameTimeline.getYearsPassed()), statistics.getWorkerCount()));
+                    labelYear.setText(String.valueOf(gameTimeline.getYearsPassed()));
                     labelPopulationSize.setText(String.valueOf(statistics.getWorkerCount()));
                     labelFemaleWorkers.setText(String.valueOf(statistics.getFemaleWorkerCount()));
                     labelMaleWorkers.setText(String.valueOf(statistics.getMaleWorkerCount()));
@@ -97,7 +103,7 @@ public class Controller {
         };
 
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, Worker.getDurationOfYear());
+        timer.scheduleAtFixedRate(task, 0, GameTimeline.getDurationOfYear());
 
     }
 

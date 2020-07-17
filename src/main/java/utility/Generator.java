@@ -111,6 +111,7 @@ public class Generator {
 
     /**
      * Determines whether a migration happens
+     *
      * @return
      */
 
@@ -122,19 +123,14 @@ public class Generator {
 
     /**
      * Determines how many settlers potentially migrate this year
+     *
      * @return
      */
     public static int randomMigrationRate() {
 
-        if (Statistics.statistics == null) {
-            Statistics.createStatistics();
-        }
-
         return random.nextInt((int) Statistics.statistics.getWorkerCount() / 100) + 1;
 
     }
-
-
 
 
     public static int randomMaxChildCounter() {

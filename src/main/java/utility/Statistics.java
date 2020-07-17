@@ -9,37 +9,24 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-public class Statistics extends Thread {
+public class Statistics {
 
-    private ArrayList<Worker> workersStatisticsList = new ArrayList<>();
+    private final List<Worker> workersStatisticsList;
     public static Statistics statistics;
     private long workersCount;
     private long femaleWorkersCount;
     private long maleWorkersCount;
     private long migratedWorkersCount;
     private HashMap<String, Integer> vocationMap;
-    private static ReentrantLock mutex = new ReentrantLock();
 
-    private Statistics() {
-    }
-
-    public static Statistics createStatistics() {
-
-        if (statistics == null) {
-
-            statistics = new Statistics();
-
-        }
-        return statistics;
-
+    public Statistics(List<Worker> workersList) {
+        statistics = this;
+        this.workersStatisticsList = workersList;
     }
 
 
-    private void generateWorkerStatistics() {
+    public void generateWorkerStatistics() {
 
-
-
-        workersStatisticsList = new ArrayList<>(Worker.getWorkersList());
         workersCount = workersStatisticsList.size();
 
         femaleWorkersCount = workersStatisticsList.stream()
@@ -102,24 +89,6 @@ public class Statistics extends Thread {
 
             }
         }
-
-    }
-
-    @Override
-    public void run() {
-
-        do {
-
-            generateWorkerStatistics();
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        } while (workersCount > 0);
-
 
     }
 }

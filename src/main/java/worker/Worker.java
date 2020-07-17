@@ -6,24 +6,18 @@ import vocation.Vocation;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Worker extends Thread {
+public class Worker {
 
 
     // Program properties
     public static final int population = 200;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
-    private final static int durationOfYear = 500;
-    private static ArrayList<Worker> workersList = new ArrayList<>();
-    private static int yearsPassed = 0;
-    private static Timer timer;
-    private static ReentrantLock mutex = new ReentrantLock();
-
 
     // Worker properties
     private int age;
-    private String name;
-    private char gender;
+    private final String name;
+    private final char gender;
     private boolean isAlive;
     private Vocation vocation;
     private boolean hasVocation;
@@ -34,21 +28,20 @@ public class Worker extends Thread {
     private int fertility;
     private int childCounter;
     private int maxChildCounter;
-    private HashSet<Worker> children;
-    private HashSet<Worker> parents;
+    private final HashSet<Worker> children;
+    private final HashSet<Worker> parents;
     private HashSet<Worker> siblings;
-    private boolean migrated;
+    private final boolean migrated;
+    private final List<Worker> workersList;
 
     /**
      * Worker gets born
      */
 
-    public Worker() {
+    public Worker(List<Worker> workersList) {
 
-        mutex.lock();
+        this.workersList = workersList;
         workersList.add(this);
-        mutex.unlock();
-
         this.age = 1;
         this.gender = Generator.randomGender();
         this.name = selectName(gender);
@@ -70,14 +63,13 @@ public class Worker extends Thread {
 
     /**
      * Worker migrates to the village
+     *
      * @param age
      */
-    public Worker(int age) {
+    public Worker(int age, List<Worker> workersList) {
 
-        mutex.lock();
+        this.workersList = workersList;
         workersList.add(this);
-        mutex.unlock();
-
         this.age = age;
         this.gender = Generator.randomGender();
         this.name = selectName(gender);
@@ -99,16 +91,12 @@ public class Worker extends Thread {
     }
 
 
-    boolean checkAdulthood() {
+    public void checkAdulthood() {
 
         if (vocation == null && age >= 15) {
             vocation = chooseVocation();
             isAdult = true;
-            return true;
         }
-
-        return false;
-
     }
 
     String selectName(char gender) {
@@ -140,7 +128,7 @@ public class Worker extends Thread {
 
     }
 
-    void workerAges() {
+    public void workerAges() {
 
         this.age++;
 
@@ -151,7 +139,7 @@ public class Worker extends Thread {
     }
 
 
-    void checkHealth() {
+    public void checkHealth() {
 
         if (age > 50) {
             health -= Generator.randomHealthDegeneration();
@@ -164,13 +152,11 @@ public class Worker extends Thread {
 
     }
 
-    void findPartner() {
+    public void findPartner() {
 
         if (age > 15 && partner == null
                 && Generator.randomBoolean()
                 && Generator.randomBoolean()) {
-
-            mutex.lock();
 
             for (Worker worker : workersList) {
 
@@ -192,13 +178,12 @@ public class Worker extends Thread {
 
             }
 
-            mutex.unlock();
 
         }
 
     }
 
-    void workerProcreates() {
+    public void workerProcreates() {
 
         if (hasPartner()
                 && gender == 'f'
@@ -207,11 +192,11 @@ public class Worker extends Thread {
             if ((fertility + getPartner().fertility) / 2 > 80
                     && (age < 50 && getPartner().getAge() < 50)) {
 
-                Worker child = new Worker();
+                Worker child = new Worker(workersList);
                 childCounter++;
                 children.add(child);
 
-                mutex.lock();
+
                 if (partner != null) {
                     getPartner().children.add(child);
                 }
@@ -220,29 +205,22 @@ public class Worker extends Thread {
                 child.parents.add(this);
                 child.parents.add(this.partner);
 
-                mutex.unlock();
 
                 // set the siblings
                 if (children.size() > 1) {
 
-                    mutex.lock();
+                    Iterator<Worker> iterator = children.iterator();
+                    while(iterator.hasNext()) {
 
-
-                    Iterator iterator = children.iterator();
-
-                    while (iterator.hasNext()) {
-
-                        Worker sibling = (Worker) iterator.next();
+                        Worker sibling = iterator.next();
                         HashSet<Worker> tempSiblings = new HashSet<>(children);
                         tempSiblings.remove(sibling);
                         sibling.siblings = tempSiblings;
 
                     }
 
-                    mutex.unlock();
                 }
 
-                child.start();
 //                System.out.println("A new child has been born: " + child);
 
             }
@@ -250,14 +228,13 @@ public class Worker extends Thread {
 
     }
 
-    public static void workerMigrates() {
+    public static void workerMigrates(List<Worker> workersList) {
 
         for (int i = 0; i < Generator.randomMigrationRate(); i++) {
 
             if (Generator.randomMigrationChance() >= 8) {
 
-                Worker worker = new Worker(Generator.randomAge());
-                worker.start();
+                new Worker(Generator.randomAge(), workersList);
 
             }
 
@@ -266,7 +243,7 @@ public class Worker extends Thread {
     }
 
 
-    void workerDies() {
+    public void workerDies() {
 
         isAlive = false;
 //        System.out.println(ANSI_RED + this + " has died of old age in the year " + yearsPassed + ANSI_RESET);
@@ -276,45 +253,14 @@ public class Worker extends Thread {
             partner.setPartner(null);
             partner = null;
         }
-        mutex.lock();
+
         workersList.remove(this);
-        mutex.unlock();
-
-        if (workersList.isEmpty()) {
-            timer.cancel();
-        }
-
-    }
-
-
-    @Override
-    public void run() {
-
-        while (isAlive) {
-
-            workerAges();
-            checkAdulthood();
-            findPartner();
-            workerProcreates();
-            checkHealth();
-
-            try {
-                Thread.sleep(durationOfYear);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
 
     }
 
 
     public boolean hasVocation() {
         return hasVocation;
-    }
-
-    public static ArrayList<Worker> getWorkersList() {
-        return workersList;
     }
 
     public int getAge() {
@@ -339,20 +285,6 @@ public class Worker extends Thread {
 
     public Worker getPartner() {
         return partner;
-    }
-
-    public static void startCalendar() {
-
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                yearsPassed++;
-            }
-        };
-        timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, durationOfYear);
-
-
     }
 
 
@@ -391,29 +323,12 @@ public class Worker extends Thread {
     }
 
 
-    public static int getYearsPassed() {
-        return yearsPassed;
-    }
-
     public boolean isMigrated() {
         return migrated;
     }
 
-    public static int getDurationOfYear() {
-        return durationOfYear;
+    public boolean isAlive() {
+        return isAlive;
     }
-
-    public static void startPopulation() {
-
-        for (int i = 0; i < population; i++) {
-
-            new Worker().start();
-
-        }
-
-        startCalendar();
-
-    }
-
 }
 
