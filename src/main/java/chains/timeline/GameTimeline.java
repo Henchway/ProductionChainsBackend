@@ -1,23 +1,21 @@
-package timeline;
+package chains.timeline;
 
-import utility.Statistics;
-import worker.Worker;
+import chains.utility.Statistics;
+import chains.worker.Worker;
 
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 public class GameTimeline {
 
-    public final List<Worker> workersList;
-    private int yearsPassed = 0;
+    public static final CopyOnWriteArrayList<Worker> workersList = new CopyOnWriteArrayList<>();
+    private static int yearsPassed = 0;
     private final static int durationOfYear = 100;
     private final int population;
     private Statistics statistics;
 
-    public GameTimeline(int population) {
-        this.workersList = new CopyOnWriteArrayList<>();
-        this.population = population;
+    public GameTimeline() {
+        this.population = 100;
     }
 
     public void processNewYear() {
@@ -34,7 +32,7 @@ public class GameTimeline {
 
         }
 
-        Worker.workerMigrates(workersList);
+        Worker.workerMigrates((int) statistics.getWorkerCount());
         statistics.generateWorkerStatistics();
 
 
@@ -43,7 +41,7 @@ public class GameTimeline {
     public void startPopulation() {
 
         for (int i = 0; i < population; i++) {
-            new Worker(workersList);
+            new Worker();
         }
     }
 
@@ -52,15 +50,17 @@ public class GameTimeline {
         this.statistics = statistics;
     }
 
-    public int getYearsPassed() {
+    public static int getYearsPassed() {
         return yearsPassed;
     }
 
-    public void setYearsPassed(int yearsPassed) {
-        this.yearsPassed = yearsPassed;
+    public static void setYearsPassed(int years) {
+        yearsPassed = years;
     }
 
     public static int getDurationOfYear() {
         return durationOfYear;
     }
+
+
 }

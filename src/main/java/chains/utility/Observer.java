@@ -1,4 +1,4 @@
-package utility;
+package chains.utility;
 
 public interface Observer {
 

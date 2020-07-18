@@ -1,4 +1,4 @@
-package resources.raw;
+package chains.raw;
 
 public class Coal {
 }

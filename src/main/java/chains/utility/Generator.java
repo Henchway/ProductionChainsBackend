@@ -1,7 +1,6 @@
-package utility;
+package chains.utility;
 
-import vocation.*;
-import worker.Worker;
+import chains.vocation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +15,8 @@ import java.util.Random;
 public class Generator {
 
     static Random random = new Random();
-    static List maleNames;
-    static List femaleNames;
+    static List<String> maleNames;
+    static List<String> femaleNames;
 
 
     public static char randomGender() {
@@ -126,9 +125,9 @@ public class Generator {
      *
      * @return
      */
-    public static int randomMigrationRate() {
+    public static int randomMigrationRate(int workerCount) {
 
-        return random.nextInt((int) Statistics.statistics.getWorkerCount() / 100) + 1;
+        return random.nextInt((workerCount / 100) + 1) + 1;
 
     }
 

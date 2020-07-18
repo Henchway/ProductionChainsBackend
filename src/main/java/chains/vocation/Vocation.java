@@ -1,4 +1,4 @@
-package vocation;
+package chains.vocation;
 
 public abstract class Vocation {
 

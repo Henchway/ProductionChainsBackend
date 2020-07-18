@@ -1,34 +1,32 @@
-package utility;
+package chains.utility;
 
-import worker.Worker;
+import chains.timeline.GameTimeline;
+import chains.worker.Worker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
 
 public class Statistics {
 
-    private final List<Worker> workersStatisticsList;
-    public static Statistics statistics;
+    private CopyOnWriteArrayList<Worker> workersStatisticsList;
     private long workersCount;
     private long femaleWorkersCount;
     private long maleWorkersCount;
     private long migratedWorkersCount;
-    private HashMap<String, Integer> vocationMap;
+    private long currentYear;
+    private TreeMap<String, Integer> vocationMap;
 
-    public Statistics(List<Worker> workersList) {
-        statistics = this;
-        this.workersStatisticsList = workersList;
+    public Statistics() {
     }
 
 
     public void generateWorkerStatistics() {
 
+        workersStatisticsList = new CopyOnWriteArrayList<>(GameTimeline.workersList);
+        currentYear = GameTimeline.getYearsPassed();
         workersCount = workersStatisticsList.size();
-
         femaleWorkersCount = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
                 .filter(worker -> worker.getGender() == 'f')
@@ -60,8 +58,8 @@ public class Statistics {
         return migratedWorkersCount;
     }
 
-    public HashMap<String, Integer> getVocationMap() {
-        return vocationMap;
+    public long getCurrentYear() {
+        return currentYear;
     }
 
     public void generateVocationMap() {
@@ -72,7 +70,7 @@ public class Statistics {
                 .map(worker -> worker.getVocation().toString())
                 .collect(Collectors.toList());
 
-        vocationMap = new HashMap<>();
+        vocationMap = new TreeMap<>();
 
         if (!vocationList.isEmpty()) {
 

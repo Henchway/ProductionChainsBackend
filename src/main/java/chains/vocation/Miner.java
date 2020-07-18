@@ -1,4 +1,4 @@
-package vocation;
+package chains.vocation;
 
 public class Miner extends Vocation {
 }
