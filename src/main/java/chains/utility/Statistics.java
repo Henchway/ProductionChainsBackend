@@ -1,9 +1,14 @@
 package chains.utility;
 
+import chains.materials.Resource;
+import chains.materials.Warehouse;
 import chains.timeline.GameTimeline;
 import chains.worker.Worker;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -16,15 +21,20 @@ public class Statistics {
     private long maleWorkersCount;
     private long migratedWorkersCount;
     private long currentYear;
-    private TreeMap<String, Integer> vocationMap;
+    private TreeMap<String, Integer> workMap;
+    private final GameTimeline gameTimeline;
+    private final Warehouse warehouse;
+    private HashMap<Class<? extends Resource>, Integer> resources;
 
-    public Statistics() {
+    public Statistics(GameTimeline gameTimeline) {
+        this.gameTimeline = gameTimeline;
+        this.warehouse = this.gameTimeline.getWarehouse();
     }
 
 
     public void generateWorkerStatistics() {
 
-        workersStatisticsList = new CopyOnWriteArrayList<>(GameTimeline.workersList);
+        workersStatisticsList = new CopyOnWriteArrayList<>(gameTimeline.getWorkersList());
         currentYear = GameTimeline.getYearsPassed();
         workersCount = workersStatisticsList.size();
         femaleWorkersCount = workersStatisticsList.stream()
@@ -38,8 +48,42 @@ public class Statistics {
                 .count();
 
         maleWorkersCount = workersCount - femaleWorkersCount;
-        generateVocationMap();
+        generateWorkMap();
 
+    }
+
+    /**
+     * Generates a map containing the work names and count of occurrences
+     */
+    public void generateWorkMap() {
+
+        List<String> workList = workersStatisticsList.stream()
+                .filter(Objects::nonNull)
+                .filter(Worker::hasVocation)
+                .map(worker -> worker.getWork().toString())
+                .collect(Collectors.toList());
+
+        workMap = new TreeMap<>();
+
+        if (!workList.isEmpty()) {
+
+            for (String s : workList) {
+
+                if (workMap.containsKey(s)) {
+
+                    workMap.put(s, workMap.get(s) + 1);
+
+                } else {
+
+                    workMap.put(s, 1);
+                }
+
+            }
+        }
+    }
+
+    public void getWarehouseResources() {
+        this.resources = this.warehouse.getResources();
     }
 
     public long getWorkerCount() {
@@ -62,31 +106,12 @@ public class Statistics {
         return currentYear;
     }
 
-    public void generateVocationMap() {
 
-        List<String> vocationList = workersStatisticsList.stream()
-                .filter(Objects::nonNull)
-                .filter(Worker::hasVocation)
-                .map(worker -> worker.getVocation().toString())
-                .collect(Collectors.toList());
+    public HashMap<Class<? extends Resource>, Integer> getResources() {
+        return resources;
+    }
 
-        vocationMap = new TreeMap<>();
-
-        if (!vocationList.isEmpty()) {
-
-            for (String s : vocationList) {
-
-                if (vocationMap.containsKey(s)) {
-
-                    vocationMap.put(s, vocationMap.get(s) + 1);
-
-                } else {
-
-                    vocationMap.put(s, 1);
-                }
-
-            }
-        }
-
+    public TreeMap<String, Integer> getWorkMap() {
+        return workMap;
     }
 }

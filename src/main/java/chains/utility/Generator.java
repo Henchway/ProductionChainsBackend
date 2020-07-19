@@ -1,6 +1,9 @@
 package chains.utility;
 
-import chains.vocation.*;
+import chains.occupation.Work;
+import chains.occupation.occupations.*;
+import chains.occupation.type.Labour;
+import chains.worker.Worker;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,34 +55,19 @@ public class Generator {
     }
 
 
-    public static Vocation randomVocation() {
-
+    public static Work randomWork(Worker worker) {
 
         int selection = random.nextInt(5);
-        Vocation vocation;
 
-        switch (selection) {
-            case 0:
-                vocation = new Hunter();
-                break;
-            case 1:
-                vocation = new Lumberjack();
-                break;
-            case 2:
-                vocation = new Miner();
-                break;
-            case 3:
-                vocation = new Shepherd();
-                break;
-            case 4:
-                vocation = new Tanner();
-                break;
-            default:
-                vocation = null;
-                break;
-        }
+        return switch (selection) {
+            case 0 -> new Hunter(worker);
+            case 1 -> new Lumberjack(worker);
+            case 2 -> new Miner(worker);
+            case 3 -> new Shepherd(worker);
+            case 4 -> new Tanner(worker);
+            default -> null;
 
-        return vocation;
+        };
 
     }
 
@@ -98,7 +86,7 @@ public class Generator {
         if (femaleNames == null) {
             femaleNames = readFileIntoList("FirstNames_female.txt");
         }
-        return (String) femaleNames.get(random.nextInt(femaleNames.size()));
+        return femaleNames.get(random.nextInt(femaleNames.size()));
 
     }
 

@@ -1,18 +1,18 @@
 package chains.worker;
 
+import chains.materials.Resource;
+import chains.occupation.Work;
 import chains.timeline.GameTimeline;
 import chains.utility.Generator;
-import chains.vocation.Vocation;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Worker {
 
 
     // Program properties
-    public static final int population = 200;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
 
@@ -21,8 +21,8 @@ public class Worker {
     private final String name;
     private final char gender;
     private boolean isAlive;
-    private Vocation vocation;
-    private boolean hasVocation;
+    private Work work;
+    private boolean hasWork;
     private boolean isAdult;
     private boolean criticalAge;
     private int health;
@@ -34,67 +34,47 @@ public class Worker {
     private final CopyOnWriteArraySet<Worker> parents;
     private CopyOnWriteArraySet<Worker> siblings;
     private final boolean migrated;
+    private final GameTimeline gameTimeline;
 
     /**
      * Worker gets born
      */
 
-    public Worker() {
+    public Worker(GameTimeline gameTimeline, boolean migrated) {
 
-        GameTimeline.workersList.add(this);
-        this.age = 1;
+        this.gameTimeline = gameTimeline;
+        this.gameTimeline.addWorkerToList(this);
+
+        if (migrated) {
+            this.age = Generator.randomAge();
+        } else {
+            this.age = 1;
+        }
+
         this.gender = Generator.randomGender();
         this.name = selectName(gender);
         this.health = 75 + Generator.randomHealth();
-        this.vocation = null;
-        this.hasVocation = false;
+        this.work = null;
+        this.hasWork = false;
         this.isAdult = false;
         this.criticalAge = false;
         this.isAlive = true;
         this.fertility = 70 + Generator.randomFertility();
         this.childCounter = 0;
         this.maxChildCounter = maxChildren();
-        this.children = new CopyOnWriteArraySet<Worker>();
-        this.siblings = new CopyOnWriteArraySet<Worker>();
-        this.parents = new CopyOnWriteArraySet<Worker>();
-        this.migrated = false;
-
-    }
-
-    /**
-     * Worker migrates to the village
-     *
-     * @param age
-     */
-    public Worker(int age) {
-
-
-       GameTimeline.workersList.add(this);
-        this.age = age;
-        this.gender = Generator.randomGender();
-        this.name = selectName(gender);
-        this.health = 75 + Generator.randomHealth();
-        this.vocation = null;
-        this.hasVocation = false;
-        this.isAdult = false;
-        this.criticalAge = false;
-        this.isAlive = true;
-        this.fertility = 70 + Generator.randomFertility();
-        this.childCounter = 0;
-        this.maxChildCounter = maxChildren();
-        this.children = new CopyOnWriteArraySet<Worker>();
-        this.siblings = new CopyOnWriteArraySet<Worker>();
-        this.parents = new CopyOnWriteArraySet<Worker>();
-        this.migrated = true;
+        this.children = new CopyOnWriteArraySet<>();
+        this.parents = new CopyOnWriteArraySet<>();
+        this.siblings = new CopyOnWriteArraySet<>();
+        this.migrated = migrated;
         checkAdulthood();
 
     }
 
-
     public void checkAdulthood() {
 
-        if (vocation == null && age >= 15) {
-            vocation = chooseVocation();
+        if (work == null && age >= 15) {
+            work = chooseWork();
+            work.setWorker(this);
             isAdult = true;
         }
     }
@@ -119,12 +99,12 @@ public class Worker {
 
     }
 
-    Vocation chooseVocation() {
+    Work chooseWork() {
 
-        Vocation vocation = Generator.randomVocation();
-        hasVocation = true;
+        Work work = Generator.randomWork(this);
+        hasWork = true;
 //        System.out.println(this + " has taken up the chains.vocation of " + chains.vocation);
-        return vocation;
+        return work;
 
     }
 
@@ -154,11 +134,11 @@ public class Worker {
 
     public void findPartner() {
 
-        if (age > 15 && partner == null
+        if (isAdult && partner == null
                 && Generator.randomBoolean()
                 && Generator.randomBoolean()) {
 
-            for (Worker worker : GameTimeline.workersList) {
+            for (Worker worker : gameTimeline.getWorkersList()) {
 
                 if (!worker.hasPartner()
                         && worker.isAlive
@@ -192,7 +172,7 @@ public class Worker {
             if ((fertility + getPartner().fertility) / 2 > 80
                     && (age < 50 && getPartner().getAge() < 50)) {
 
-                Worker child = new Worker();
+                Worker child = new Worker(gameTimeline, false);
                 childCounter++;
                 children.add(child);
 
@@ -205,15 +185,12 @@ public class Worker {
                 child.parents.add(this);
                 child.parents.add(this.partner);
 
-
                 // set the siblings
                 if (children.size() > 1) {
 
-                    Iterator<Worker> iterator = children.iterator();
-                    while(iterator.hasNext()) {
+                    for (Worker sibling : children) {
 
-                        Worker sibling = iterator.next();
-                        CopyOnWriteArraySet<Worker> tempSiblings = new CopyOnWriteArraySet<Worker>(children);
+                        CopyOnWriteArraySet<Worker> tempSiblings = new CopyOnWriteArraySet<>(children);
                         tempSiblings.remove(sibling);
                         sibling.siblings = tempSiblings;
 
@@ -228,16 +205,14 @@ public class Worker {
 
     }
 
-    public static void workerMigrates(int workerCount) {
+    public void work() {
 
-        for (int i = 0; i < Generator.randomMigrationRate(workerCount); i++) {
-
-            if (Generator.randomMigrationChance() >= 8) {
-
-                new Worker(Generator.randomAge());
-
+        if (this.hasWork) {
+            this.work.setEfficiency();
+            List<HashMap<Class<? extends Resource>, Integer>> products = this.work.produce();
+            if (products != null && products.size() > 0) {
+                this.work.store(products);
             }
-
         }
 
     }
@@ -254,13 +229,13 @@ public class Worker {
             partner = null;
         }
 
-        GameTimeline.workersList.remove(this);
+        gameTimeline.removeWorkerFromList(this);
 
     }
 
 
     public boolean hasVocation() {
-        return hasVocation;
+        return hasWork;
     }
 
     public int getAge() {
@@ -275,8 +250,8 @@ public class Worker {
         return gender;
     }
 
-    public Vocation getVocation() {
-        return vocation;
+    public Work getWork() {
+        return work;
     }
 
     public boolean hasPartner() {
@@ -313,7 +288,7 @@ public class Worker {
                 "\t\tage =" + "\t\t\t" + age + "\n" +
                 "\t\tgender =" + "\t\t" + gender + "\n" +
                 "\t\tisAlive =" + "\t\t" + isAlive + "\n" +
-                "\t\tchains.vocation =" + "\t\t" + vocation + "\n" +
+                "\t\tchains.vocation =" + "\t\t" + work + "\n" +
                 "\t\tisAdult =" + "\t\t" + isAdult + "\n" +
                 "\t\tcriticalAge =" + "\t" + criticalAge + "\n" +
                 "\t\thealth =" + "\t\t" + health + "\n" +
@@ -329,6 +304,46 @@ public class Worker {
 
     public boolean isAlive() {
         return isAlive;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isHasWork() {
+        return hasWork;
+    }
+
+    public boolean isAdult() {
+        return isAdult;
+    }
+
+    public boolean isCriticalAge() {
+        return criticalAge;
+    }
+
+    public int getChildCounter() {
+        return childCounter;
+    }
+
+    public int getMaxChildCounter() {
+        return maxChildCounter;
+    }
+
+    public CopyOnWriteArraySet<Worker> getChildren() {
+        return children;
+    }
+
+    public CopyOnWriteArraySet<Worker> getParents() {
+        return parents;
+    }
+
+    public CopyOnWriteArraySet<Worker> getSiblings() {
+        return siblings;
+    }
+
+    public GameTimeline getGameTimeline() {
+        return gameTimeline;
     }
 }
 

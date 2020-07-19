@@ -27,9 +27,10 @@ public class TimelineRestServiceController {
     @PostMapping("/start")
     public ResponseEntity<Object> startTimeline() {
 
+
         gameTimeline.setStatistics(statistics);
         gameTimeline.startPopulation();
-        statistics.generateWorkerStatistics();
+//        statistics.generateWorkerStatistics();
         createTimer();
         return new ResponseEntity<>(HttpStatus.OK);
 
@@ -46,14 +47,8 @@ public class TimelineRestServiceController {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                /* Note to self: https://stackoverflow.com/questions/13784333/platform-runlater-and-task-in-javafx
-                runLater übergibt den Task an den JavaFX Thread um Concurrency Issues zu verhindern.
-                Weiterer Vortei: Beim Animation Timer kann die Tick-Rate nicht beinflusst werden, bei gewöhnlichen Threads schon, bzw. speziell beim Timer ist das einfach.
-                 */
-
                 GameTimeline.setYearsPassed(GameTimeline.getYearsPassed() + 1);
                 gameTimeline.processNewYear();
-
             }
         };
 

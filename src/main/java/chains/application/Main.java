@@ -1,27 +1,11 @@
 package chains.application;
 
+import chains.materials.Warehouse;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import chains.timeline.GameTimeline;
 import chains.utility.Statistics;
-
-
-//public class Main extends Application {
-//
-//    @Override
-//        public void start(Stage primaryStage) throws Exception{
-//            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("GUI.fxml")));
-//            primaryStage.setTitle("Hello World");
-//            primaryStage.setScene(new Scene(root, 800, 600));
-//            primaryStage.show();
-//}
-//
-//
-//    public static void main(String[] args) {
-//        launch(args);
-//    }
-//}
 
 
 @SpringBootApplication(scanBasePackages = "chains")
@@ -33,13 +17,18 @@ public class Main {
     }
 
     @Bean
-    public GameTimeline gameTimeline() {
-        return new GameTimeline();
+    public Warehouse warehouse() {
+        return new Warehouse();
     }
 
     @Bean
-    public Statistics statistics() {
-        return new Statistics();
+    public GameTimeline gameTimeline(Warehouse warehouse) {
+        return new GameTimeline(warehouse);
+    }
+
+    @Bean
+    public Statistics statistics(GameTimeline gameTimeline) {
+        return new Statistics(gameTimeline);
     }
 
 }
