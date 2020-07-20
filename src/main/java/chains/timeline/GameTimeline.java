@@ -1,10 +1,15 @@
 package chains.timeline;
 
+import chains.materials.Resource;
 import chains.materials.Warehouse;
+import chains.materials.raw.Meat;
+import chains.materials.raw.Milk;
 import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -12,7 +17,7 @@ public class GameTimeline {
 
     private final CopyOnWriteArrayList<Worker> workersList = new CopyOnWriteArrayList<>();
     private static int yearsPassed = 0;
-    private final static int durationOfYear = 100;
+    private final static int durationOfYear = 300;
     private Statistics statistics;
     private int population;
     private Warehouse warehouse;
@@ -27,11 +32,12 @@ public class GameTimeline {
         for (Worker worker : workersList) {
 
             if (worker.isAlive()) {
-                worker.workerAges();
+                worker.age();
                 worker.checkAdulthood();
                 worker.findPartner();
-                worker.workerProcreates();
+                worker.procreate();
                 worker.work();
+                worker.eat();
                 worker.checkHealth();
             }
 
@@ -48,6 +54,21 @@ public class GameTimeline {
         for (int i = 0; i < population; i++) {
             new Worker(this, false);
         }
+        setInitialResources();
+    }
+
+    public void setInitialResources() {
+
+        List<Resource> meat = new ArrayList<>();
+        List<Resource> milk = new ArrayList<>();
+        for (int i = 0; i < 500; i++) {
+            meat.add(new Meat());
+            milk.add(new Milk());
+        }
+
+        warehouse.addResourceToWarehouse(meat);
+        warehouse.addResourceToWarehouse(milk);
+
     }
 
 

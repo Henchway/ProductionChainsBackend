@@ -4,11 +4,11 @@ import chains.materials.Resource;
 import chains.materials.lifestock.Sheep;
 import chains.materials.raw.Meat;
 import chains.materials.raw.Wool;
-import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Shepherd extends Labour {
 
@@ -36,14 +36,18 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        int availableSheeps = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() / 3;
+        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() / 3)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(Sheep.class::cast)
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < availableSheeps; i++) {
-            retrieveResourceFromLocalStorage(Sheep.class, 1L);
-            for (int j = 0; j < 5; j++) {
+        sheepList.forEach(sheep -> {
+            for (int i = 0; i < sheep.getMeat(); i++) {
                 list.add(new Meat());
             }
-        }
+        });
+
         return list;
     }
 
@@ -51,16 +55,21 @@ public class Shepherd extends Labour {
     public List<Resource> produceWool() {
 
         List<Resource> list = new ArrayList<>();
-        int availableSheeps = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size();
 
-        for (int i = 0; i < availableSheeps; i++) {
-            for (int j = 0; j < 10; j++) {
+        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(Sheep.class::cast)
+                .collect(Collectors.toList());
+
+        sheepList.forEach(sheep -> {
+            for (int i = 0; i < sheep.getWool(); i++) {
                 list.add(new Wool());
             }
-        }
+        });
+
         return list;
     }
-
 
     @Override
     public void acquireTool() {

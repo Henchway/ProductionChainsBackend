@@ -1,12 +1,9 @@
 package chains.worker;
 
-import chains.materials.Resource;
 import chains.occupation.Work;
 import chains.timeline.GameTimeline;
 import chains.utility.Generator;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Worker {
@@ -35,6 +32,7 @@ public class Worker {
     private CopyOnWriteArraySet<Worker> siblings;
     private final boolean migrated;
     private final GameTimeline gameTimeline;
+    private boolean starving;
 
     /**
      * Worker gets born
@@ -108,7 +106,7 @@ public class Worker {
 
     }
 
-    public void workerAges() {
+    public void age() {
 
         this.age++;
 
@@ -126,7 +124,7 @@ public class Worker {
         }
 
         if (health < age) {
-            workerDies();
+            die("Old age");
         }
 
 
@@ -163,7 +161,7 @@ public class Worker {
 
     }
 
-    public void workerProcreates() {
+    public void procreate() {
 
         if (hasPartner()
                 && gender == 'f'
@@ -214,11 +212,22 @@ public class Worker {
 
     }
 
+    public void eat() {
 
-    public void workerDies() {
+        int requiredEnergy = isAdult ? 10 : (age > 9 ? 4 : 2);
+        boolean starvationImminent = gameTimeline.getWarehouse().retrieveFoodFromWarehouse(requiredEnergy).isEmpty();
+        if (starvationImminent && starving) {
+            die("Starvation");
+        }
+        starving = starvationImminent;
+
+    }
+
+
+    public void die(String reason) {
 
         isAlive = false;
-//        System.out.println(ANSI_RED + this + " has died of old age in the year " + yearsPassed + ANSI_RESET);
+        System.out.println(ANSI_RED + this + " has died of " + reason + " in the year " + gameTimeline.getStatistics().getCurrentYear() + ANSI_RESET);
 //        System.out.println(obituary());
 
         if (hasPartner()) {

@@ -2,7 +2,6 @@ package chains.utility;
 
 import chains.occupation.Work;
 import chains.occupation.occupations.*;
-import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
 import java.io.File;
@@ -72,6 +71,13 @@ public class Generator {
             default -> null;
 
         };
+
+    }
+
+    public static int nextInt(int bound) {
+
+        Random random = new Random();
+        return random.nextInt(bound);
 
     }
 

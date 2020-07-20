@@ -1,4 +1,4 @@
 package chains.materials;
 
-public interface Food {
+public interface Food extends Resource {
 }

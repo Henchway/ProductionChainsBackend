@@ -1,8 +1,7 @@
 package chains.materials;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Warehouse {
 
@@ -44,6 +43,34 @@ public class Warehouse {
 
         return retrievedResources;
     }
+
+    public List<Food> retrieveFoodFromWarehouse(int amount) {
+
+        List<Food> retrievedResources = new ArrayList<>();
+
+        List<Food> allFood = resources.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(resource -> resource instanceof Food)
+                .map(Food.class::cast)
+                .collect(Collectors.toList());
+
+        if (!allFood.isEmpty()) {
+
+            int boundary = Math.min(amount, allFood.size());
+
+            for (int i = 0; i < boundary; i++) {
+                Random random = new Random();
+                Food food = allFood.get(random.nextInt(allFood.size()));
+                retrievedResources.add(food);
+                resources.get(food.getClass()).remove(food);
+            }
+        }
+
+        return retrievedResources;
+
+    }
+
 
     public HashMap<Class<? extends Resource>, List<Resource>> getResources() {
         return resources;

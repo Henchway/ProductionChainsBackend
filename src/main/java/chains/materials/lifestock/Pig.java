@@ -1,6 +1,11 @@
 package chains.materials.lifestock;
 
 import chains.materials.Lifestock;
+import chains.utility.Generator;
 
 public class Pig extends Lifestock {
+
+    public Pig() {
+        meat = 15 + Generator.nextInt(5);
+    }
 }
