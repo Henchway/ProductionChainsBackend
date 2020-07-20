@@ -1,41 +1,51 @@
 package chains.materials;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Warehouse {
 
-    private final HashMap<Class<? extends Resource>, Long> resources = new HashMap<>();
+    private final HashMap<Class<? extends Resource>, List<Resource>> resources = new HashMap<>();
 
-    public <T extends Resource> void addResourceToWarehouse(Class<T> resource, Long amount) {
+    public void addResourceToWarehouse(List<Resource> list) {
 
-        // If the resource already exists in the warehouse, increase the number of stored pieces
-        if (resources.containsKey(resource)) {
-            resources.put(resource, resources.get(resource) + amount);
-        } else {
-            // Else simply add the received resource & amount
-            resources.put(resource, amount);
+        if (!list.isEmpty()) {
+            Class<? extends Resource> resource = list.get(0).getClass();
+
+            // If the resource already exists in the warehouse, increase the number of stored pieces
+            if (resources.containsKey(resource)) {
+                resources.get(resource).addAll(list);
+            } else {
+                // Else simply add the received resource & amount
+                resources.put(resource, list);
+            }
         }
-
     }
 
-    public <T extends Resource> HashMap<Class<T>, Long> retrieveResourceFromWarehouse(Class<T> requestedResource, Long amount) {
+    public <T extends Resource> List<Resource> retrieveResourceFromWarehouse(Class<T> requestedResource, Long amount) {
 
-        HashMap<Class<T>, Long> retrievedResources = new HashMap<Class<T>, Long>();
+        List<Resource> retrievedResources = new ArrayList<>();
+        List<Resource> itemsInMap = resources.get(requestedResource);
 
         if (resources.containsKey(requestedResource)) {
-            if (amount > resources.get(requestedResource)) {
-                retrievedResources.put(requestedResource, resources.get(requestedResource));
+            if (itemsInMap.size() < amount) {
+                retrievedResources.addAll(itemsInMap);
                 resources.remove(requestedResource);
             } else {
-                retrievedResources.put(requestedResource, amount);
-                resources.put(requestedResource, resources.get(requestedResource) - amount);
+                List<Resource> list = new ArrayList<>();
+                for (int i = 0; i < amount; i++) {
+                    list.add(itemsInMap.get(itemsInMap.size() - 1));
+                    itemsInMap.remove(itemsInMap.size() - 1);
+                }
+                retrievedResources.addAll(list);
             }
         }
 
         return retrievedResources;
     }
 
-    public HashMap<Class<? extends Resource>, Long> getResources() {
+    public HashMap<Class<? extends Resource>, List<Resource>> getResources() {
         return resources;
     }
 }

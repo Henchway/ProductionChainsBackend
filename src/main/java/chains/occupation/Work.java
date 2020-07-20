@@ -13,7 +13,7 @@ public abstract class Work {
     protected Warehouse warehouse;
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
-    protected HashMap<Class<? extends Resource>, Long> localResourceStorage = new HashMap<Class<? extends Resource>, Long>();
+    protected HashMap<Class<? extends Resource>, List<Resource>> localResourceStorage = new HashMap<>();
 
     @Override
     public String toString() {
@@ -25,12 +25,8 @@ public abstract class Work {
      */
     public abstract void produce();
 
-    public void store(List<HashMap<Class<? extends Resource>, Long>> resource) {
-        resource.forEach(classIntegerHashMap -> {
-            classIntegerHashMap.forEach((tClass, integer) -> {
-                warehouse.addResourceToWarehouse(tClass, integer);
-            });
-        });
+    public void store(List<Resource> resource) {
+        warehouse.addResourceToWarehouse(resource);
     }
 
     public Worker getWorker() {
@@ -51,30 +47,41 @@ public abstract class Work {
 
     public abstract void acquireTool();
 
-    public <T extends Resource> void addResourceToLocalStorage(HashMap<Class<T>, Long> resources) {
-        resources.forEach((tClass, integer) -> {
-            if (localResourceStorage.containsKey(tClass)) {
-                localResourceStorage.put(tClass, localResourceStorage.get(tClass) + integer);
+    public <T extends Resource> void addResourceToLocalStorage(List<Resource> list) {
+
+        if (!list.isEmpty()) {
+            Class<? extends Resource> resource = list.get(0).getClass();
+
+            // If the resource already exists in the warehouse, increase the number of stored pieces
+            if (localResourceStorage.containsKey(resource)) {
+                localResourceStorage.get(resource).addAll(list);
             } else {
-                localResourceStorage.put(tClass, integer);
-            }
-        });
-    }
-
-    public <T extends Resource> HashMap<Class<? extends Resource>, Long> retrieveResourceFromLocalStorage(Class<T> resource, Long amount) {
-
-        HashMap<Class<? extends Resource>, Long> map = new HashMap<>();
-
-        if (localResourceStorage.containsKey(resource)) {
-            if (amount > localResourceStorage.get(resource)) {
-                map.put(resource, localResourceStorage.get(resource));
-                localResourceStorage.remove(resource);
-            } else {
-                map.put(resource, amount);
-                localResourceStorage.put(resource, localResourceStorage.get(resource) - amount);
+                // Else simply add the received resource & amount
+                localResourceStorage.put(resource, list);
             }
         }
-        return map;
+    }
+
+    public <T extends Resource> List<Resource> retrieveResourceFromLocalStorage(Class<T> requestedResource, Long amount) {
+
+        List<Resource> retrievedResources = new ArrayList<>();
+        List<Resource> itemsInMap = localResourceStorage.get(requestedResource);
+
+        if (localResourceStorage.containsKey(requestedResource)) {
+            if (itemsInMap.size() < amount) {
+                retrievedResources.addAll(itemsInMap);
+                localResourceStorage.remove(requestedResource);
+            } else {
+                List<Resource> list = new ArrayList<>();
+                for (int i = 0; i < amount; i++) {
+                    list.add(itemsInMap.get(itemsInMap.size() - 1));
+                    itemsInMap.remove(itemsInMap.size() - 1);
+                }
+                retrievedResources.addAll(list);
+            }
+        }
+
+        return retrievedResources;
     }
 
 

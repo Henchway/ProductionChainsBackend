@@ -8,9 +8,7 @@ import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Shepherd extends Labour {
 
@@ -21,20 +19,45 @@ public class Shepherd extends Labour {
 
     @Override
     public void produce() {
-        store(produceMeatAndWool());
+        retrieveLifestock();
+        store(produceWool());
+        store(produceMeat());
     }
 
-    public List<HashMap<Class<? extends Resource>, Long>> produceMeatAndWool() {
+    public void retrieveLifestock() {
 
         Random random = new Random();
-        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(2);
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Sheep.class, random.nextInt(5) + 5L));
+        if (localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() < 50) {
+            addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Sheep.class, random.nextInt(5) + 5L * efficiency));
+        }
+    }
+
+    public List<Resource> produceMeat() {
+
+        List<Resource> list = new ArrayList<>();
+
+        int availableSheeps = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() / 3;
+
+        for (int i = 0; i < availableSheeps; i++) {
+            retrieveResourceFromLocalStorage(Sheep.class, 1L);
+            for (int j = 0; j < 5; j++) {
+                list.add(new Meat());
+            }
+        }
+        return list;
+    }
 
 
-        Long meat = (random.nextInt(10) + 20L) * efficiency;
-        Long wool = (random.nextInt(10) + 30L) * efficiency;
-        list.get(0).put(Meat.class, meat);
-        list.get(1).put(Wool.class, wool);
+    public List<Resource> produceWool() {
+
+        List<Resource> list = new ArrayList<>();
+        int availableSheeps = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size();
+
+        for (int i = 0; i < availableSheeps; i++) {
+            for (int j = 0; j < 10; j++) {
+                list.add(new Wool());
+            }
+        }
         return list;
     }
 

@@ -1,12 +1,14 @@
 package chains.occupation.occupations;
 
 import chains.materials.Resource;
+import chains.materials.intermediate.Iron;
 import chains.materials.raw.Coal;
 import chains.materials.raw.IronOre;
 import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -20,18 +22,34 @@ public class Miner extends Labour {
 
     @Override
     public void produce() {
-        store(produceCoalAndIronOre());
+        store(produceCoal());
+        store(produceIronOre());
     }
 
-    public List<HashMap<Class<? extends Resource>, Long>> produceCoalAndIronOre() {
+    public List<Resource> produceCoal() {
 
-        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(2);
+        List<Resource> list = new ArrayList<>();
         Random random = new Random();
-        Long ironOre = (random.nextInt(15) + 20L) * efficiency;
-        Long coal = (random.nextInt(30) + 20L) * efficiency;
-        list.get(0).put(IronOre.class, ironOre);
-        list.get(1).put(Coal.class, coal);
+
+        int ironOre = (random.nextInt(10) + 15) * efficiency;
+        for (int i = 0; i < ironOre; i++) {
+            list.add(new IronOre());
+        }
         return list;
+    }
+
+    public List<Resource> produceIronOre() {
+
+        List<Resource> list = new ArrayList<>();
+        Random random = new Random();
+
+        int coal = (random.nextInt(10) + 20) * efficiency;
+        for (int i = 0; i < coal; i++) {
+            list.add(new Coal());
+        }
+
+        return list;
+
     }
 
 

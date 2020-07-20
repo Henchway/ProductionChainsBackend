@@ -5,10 +5,7 @@ import chains.materials.Warehouse;
 import chains.timeline.GameTimeline;
 import chains.worker.Worker;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -24,7 +21,7 @@ public class Statistics {
     private TreeMap<String, Integer> workMap;
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
-    private HashMap<Class<? extends Resource>, Long> resources;
+    Map<String, Integer> resources;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -83,7 +80,18 @@ public class Statistics {
     }
 
     public void getWarehouseResources() {
-        this.resources = this.warehouse.getResources();
+
+        HashMap<Class<? extends Resource>, List<Resource>> resources = new HashMap<>(this.warehouse.getResources());
+
+        this.resources = resources
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        classListEntry -> classListEntry.getKey().getSimpleName(),
+                        classListEntry -> classListEntry.getValue().size())
+                );
+
+
     }
 
     public long getWorkerCount() {
@@ -107,11 +115,11 @@ public class Statistics {
     }
 
 
-    public HashMap<Class<? extends Resource>, Long> getResources() {
-        return resources;
-    }
-
     public TreeMap<String, Integer> getWorkMap() {
         return workMap;
+    }
+
+    public Map<String, Integer> getResources() {
+        return resources;
     }
 }

@@ -9,6 +9,7 @@ import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -22,24 +23,58 @@ public class Farmer extends Labour {
 
     @Override
     public void produce() {
-        store(aqcuireLifestock());
+        store(acquireChickenLifestock());
+        store(acquireCowLifestock());
+        store(acquirePigLifestock());
+        store(acquireSheepLifestock());
     }
 
-    public List<HashMap<Class<? extends Resource>, Long>> aqcuireLifestock() {
-
-        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(4);
+    public List<Resource> acquireChickenLifestock() {
+        List<Resource> list = new ArrayList<>();
         Random random = new Random();
-        Long chickens = (random.nextInt(5) + 5L) * efficiency;
-        Long cows = (random.nextInt(2) + 2L) * efficiency;
-        Long pigs = (random.nextInt(2) + 3L) * efficiency;
-        Long sheeps = (random.nextInt(2) + 3L) * efficiency;
+        int lifestock = (random.nextInt(5) + 5) * efficiency;
 
-        list.get(0).put(Chicken.class, chickens);
-        list.get(1).put(Cow.class, cows);
-        list.get(2).put(Pig.class, pigs);
-        list.get(3).put(Sheep.class, sheeps);
-
+        for (int i = 0; i < lifestock; i++) {
+            list.add(new Chicken());
+        }
         return list;
+
+    }
+
+    public List<Resource> acquireCowLifestock() {
+        List<Resource> list = new ArrayList<>();
+        Random random = new Random();
+        int lifestock = (random.nextInt(2) + 2) * efficiency;
+
+        for (int i = 0; i < lifestock; i++) {
+            list.add(new Cow());
+        }
+        return list;
+
+    }
+
+    public List<Resource> acquirePigLifestock() {
+        List<Resource> list = new ArrayList<>();
+        Random random = new Random();
+        int lifestock = (random.nextInt(2) + 3) * efficiency;
+
+        for (int i = 0; i < lifestock; i++) {
+            list.add(new Pig());
+        }
+        return list;
+
+    }
+
+    public List<Resource> acquireSheepLifestock() {
+        List<Resource> list = new ArrayList<>();
+        Random random = new Random();
+        int lifestock = (random.nextInt(2) + 3) * efficiency;
+
+        for (int i = 0; i < lifestock; i++) {
+            list.add(new Sheep());
+        }
+        return list;
+
     }
 
 

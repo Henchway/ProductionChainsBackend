@@ -7,6 +7,7 @@ import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -21,18 +22,33 @@ public class Lumberjack extends Labour {
 
     @Override
     public void produce() {
-        store(produceLumberAndTannin());
+        store(produceLumber());
+        store(produceTannin());
     }
 
-    public List<HashMap<Class<? extends Resource>, Long>> produceLumberAndTannin() {
+    public List<Resource> produceLumber() {
 
-        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(2);
+        List<Resource> list = new ArrayList<>();
         Random random = new Random();
-        Long wood = (random.nextInt(25) + 40L) * efficiency;
-        list.get(0).put(Wood.class, (long) wood);
-        list.get(1).put(Tannin.class, (long) wood / 10);
+        int wood = (random.nextInt(15) + 30) * efficiency;
+        for (int i = 0; i < wood; i++) {
+            list.add(new Wood());
+        }
         return list;
     }
+
+    public List<Resource> produceTannin() {
+
+        List<Resource> list = new ArrayList<>();
+        Random random = new Random();
+        int tannin = (random.nextInt(5) + 5) * efficiency;
+
+        for (int i = 0; i < tannin / 10; i++) {
+            list.add(new Tannin());
+        }
+        return list;
+    }
+
 
     @Override
     public void acquireTool() {
