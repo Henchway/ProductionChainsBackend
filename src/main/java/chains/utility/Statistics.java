@@ -24,7 +24,7 @@ public class Statistics {
     private TreeMap<String, Integer> workMap;
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
-    private HashMap<Class<? extends Resource>, Integer> resources;
+    private HashMap<Class<? extends Resource>, Long> resources;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -107,7 +107,7 @@ public class Statistics {
     }
 
 
-    public HashMap<Class<? extends Resource>, Integer> getResources() {
+    public HashMap<Class<? extends Resource>, Long> getResources() {
         return resources;
     }
 

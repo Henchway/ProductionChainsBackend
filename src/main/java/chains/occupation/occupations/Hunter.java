@@ -18,17 +18,17 @@ public class Hunter extends Labour {
     }
 
     @Override
-    public List<HashMap<Class<? extends Resource>, Integer>> produce() {
-        return produceMeatAndHide();
+    public void produce() {
+        store(produceMeatAndHide());
     }
 
-    public List<HashMap<Class<? extends Resource>, Integer>> produceMeatAndHide() {
+    public List<HashMap<Class<? extends Resource>, Long>> produceMeatAndHide() {
 
-        List<HashMap<Class<? extends Resource>, Integer>> list = Work.createMaps(2);
+        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(2);
         Random random = new Random();
-        int deer = (random.nextInt(20) + 15 ) * efficiency;
-        list.get(0).put(Meat.class, deer * 6);
-        list.get(1).put(Hide.class, deer);
+        int deer = (random.nextInt(20) + 15) * efficiency;
+        list.get(0).put(Meat.class, (long) deer * 6);
+        list.get(1).put(Hide.class, (long) deer);
 
         return list;
     }

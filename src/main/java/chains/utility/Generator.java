@@ -57,7 +57,7 @@ public class Generator {
 
     public static Work randomWork(Worker worker) {
 
-        int selection = random.nextInt(5);
+        int selection = random.nextInt(9);
 
         return switch (selection) {
             case 0 -> new Hunter(worker);
@@ -65,6 +65,10 @@ public class Generator {
             case 2 -> new Miner(worker);
             case 3 -> new Shepherd(worker);
             case 4 -> new Tanner(worker);
+            case 5 -> new Farmer(worker);
+            case 6 -> new Blacksmith(worker);
+            case 7 -> new Stonemason(worker);
+            case 8 -> new Butcher(worker);
             default -> null;
 
         };

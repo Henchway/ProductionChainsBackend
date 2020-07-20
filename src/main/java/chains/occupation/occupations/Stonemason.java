@@ -1,12 +1,11 @@
 package chains.occupation.occupations;
 
-import chains.occupation.type.Craft;
+import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
-public class Blacksmith extends Craft {
+public class Stonemason extends Labour {
 
-
-    public Blacksmith(Worker worker) {
+    public Stonemason(Worker worker) {
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }

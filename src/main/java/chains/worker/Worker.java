@@ -209,10 +209,7 @@ public class Worker {
 
         if (this.hasWork) {
             this.work.setEfficiency();
-            List<HashMap<Class<? extends Resource>, Integer>> products = this.work.produce();
-            if (products != null && products.size() > 0) {
-                this.work.store(products);
-            }
+            this.work.produce();
         }
 
     }

@@ -7,7 +7,6 @@ import chains.materials.raw.Tannin;
 import chains.occupation.type.Craft;
 import chains.worker.Worker;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,31 +18,32 @@ public class Tanner extends Craft {
     }
 
     @Override
-    public List<HashMap<Class<? extends Resource>, Integer>> produce() {
+    public void produce() {
 
-        ArrayList<HashMap<Class<? extends Resource>, Integer>> list = new ArrayList<>();
-        list.add(produceLeather());
-        return list;
+        store(produceLeather());
 
     }
 
-    public HashMap<Class<? extends Resource>, Integer> produceLeather() {
+    public List<HashMap<Class<? extends Resource>, Long>> produceLeather() {
 
-        HashMap<Class<Tannin>, Integer> tannin = warehouse.retrieveResourceFromWarehouse(Tannin.class, 1);
-        addToLocalStorage(tannin);
+        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Tannin.class, 2L + efficiency));
+        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Hide.class, 10L * efficiency));
 
-        HashMap<Class<Hide>, Integer> rawMaterial = warehouse.retrieveResourceFromWarehouse(Hide.class, 5 * efficiency);
-        addToLocalStorage(rawMaterial);
+        List<HashMap<Class<? extends Resource>, Long>> list = createMaps(1);
 
-        HashMap<Class<? extends Resource>, Integer> intermediateMaterial = new HashMap<>();
-
-        if (localResourceStorage.get(Tannin.class) != null && localResourceStorage.get(Tannin.class) > 0) {
-            intermediateMaterial.put(Leather.class, localResourceStorage.get(Hide.class));
-            localResourceStorage.remove(Tannin.class);
-            localResourceStorage.remove(Hide.class);
+        /**
+         * To create 5 Leather, it required 1 tannin & 5 hide
+         * Efficiency raises the amount of leather retrieved and produced at once
+         */
+        for (int i = 0; i < localResourceStorage.getOrDefault(Tannin.class, 0L); i++) {
+            for (int j = 0; j < localResourceStorage.getOrDefault(Hide.class, 0L); j = j + 5) {
+                retrieveResourceFromLocalStorage(Tannin.class, 1L);
+                retrieveResourceFromLocalStorage(Hide.class, 5L);
+                list.get(0).put(Leather.class, 5L);
+            }
         }
 
-        return intermediateMaterial;
+        return list;
     }
 
 

@@ -20,17 +20,17 @@ public class Lumberjack extends Labour {
     }
 
     @Override
-    public List<HashMap<Class<? extends Resource>, Integer>> produce() {
-        return produceLumberAndTannin();
+    public void produce() {
+        store(produceLumberAndTannin());
     }
 
-    public List<HashMap<Class<? extends Resource>, Integer>> produceLumberAndTannin() {
+    public List<HashMap<Class<? extends Resource>, Long>> produceLumberAndTannin() {
 
-        List<HashMap<Class<? extends Resource>, Integer>> list = Work.createMaps(2);
+        List<HashMap<Class<? extends Resource>, Long>> list = Work.createMaps(2);
         Random random = new Random();
-        int wood = (random.nextInt(50) + 75) * efficiency;
-        list.get(0).put(Wood.class, wood);
-        list.get(1).put(Tannin.class, wood / 10);
+        Long wood = (random.nextInt(25) + 40L) * efficiency;
+        list.get(0).put(Wood.class, (long) wood);
+        list.get(1).put(Tannin.class, (long) wood / 10);
         return list;
     }
 

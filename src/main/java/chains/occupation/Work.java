@@ -13,7 +13,7 @@ public abstract class Work {
     protected Warehouse warehouse;
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
-    protected HashMap<Class<? extends Resource>, Integer> localResourceStorage = new HashMap<>();
+    protected HashMap<Class<? extends Resource>, Long> localResourceStorage = new HashMap<Class<? extends Resource>, Long>();
 
     @Override
     public String toString() {
@@ -21,12 +21,11 @@ public abstract class Work {
     }
 
     /**
-     * @return Returns a list of produced resources
-     * The hash map contains the resource and the produced number
+     *
      */
-    public abstract List<HashMap<Class<? extends Resource>, Integer>> produce();
+    public abstract void produce();
 
-    public void store(List<HashMap<Class<? extends Resource>, Integer>> resource) {
+    public void store(List<HashMap<Class<? extends Resource>, Long>> resource) {
         resource.forEach(classIntegerHashMap -> {
             classIntegerHashMap.forEach((tClass, integer) -> {
                 warehouse.addResourceToWarehouse(tClass, integer);
@@ -52,13 +51,36 @@ public abstract class Work {
 
     public abstract void acquireTool();
 
-    public <T extends Resource> void addToLocalStorage(HashMap<Class<T>, Integer> resources) {
-        resources.forEach((tClass, integer) -> localResourceStorage.put(tClass, integer));
+    public <T extends Resource> void addResourceToLocalStorage(HashMap<Class<T>, Long> resources) {
+        resources.forEach((tClass, integer) -> {
+            if (localResourceStorage.containsKey(tClass)) {
+                localResourceStorage.put(tClass, localResourceStorage.get(tClass) + integer);
+            } else {
+                localResourceStorage.put(tClass, integer);
+            }
+        });
     }
 
-    public static List<HashMap<Class<? extends Resource>, Integer>> createMaps(int amount) {
+    public <T extends Resource> HashMap<Class<? extends Resource>, Long> retrieveResourceFromLocalStorage(Class<T> resource, Long amount) {
 
-        List<HashMap<Class<? extends Resource>, Integer>> list = new ArrayList<>();
+        HashMap<Class<? extends Resource>, Long> map = new HashMap<>();
+
+        if (localResourceStorage.containsKey(resource)) {
+            if (amount > localResourceStorage.get(resource)) {
+                map.put(resource, localResourceStorage.get(resource));
+                localResourceStorage.remove(resource);
+            } else {
+                map.put(resource, amount);
+                localResourceStorage.put(resource, localResourceStorage.get(resource) - amount);
+            }
+        }
+        return map;
+    }
+
+
+    public static List<HashMap<Class<? extends Resource>, Long>> createMaps(int amount) {
+
+        List<HashMap<Class<? extends Resource>, Long>> list = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             list.add(new HashMap<>());
         }

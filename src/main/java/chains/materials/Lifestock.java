@@ -1,4 +1,8 @@
 package chains.materials;
 
-public interface Lifestock extends Resource {
+public abstract class Lifestock implements Resource {
+
+    public int lifeExpetancy;
+    public int age;
+
 }

@@ -1,4 +1,4 @@
-package chains.materials.raw;
+package chains.materials.intermediate;
 
 import chains.materials.Resource;
 
