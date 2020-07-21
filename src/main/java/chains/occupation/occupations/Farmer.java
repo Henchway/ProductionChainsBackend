@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Random;
 
 public class Farmer extends Labour {
-
+    private static double weight = 10.0;
     public Farmer(Worker worker) {
+
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }
@@ -81,5 +82,9 @@ public class Farmer extends Labour {
     @Override
     public void acquireTool() {
 
+    }
+
+    public static double getWeight() {
+        return weight;
     }
 }

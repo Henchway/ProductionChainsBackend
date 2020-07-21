@@ -15,8 +15,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Butcher extends Craft {
-
+    private static double weight = 10.0;
     public Butcher(Worker worker) {
+
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }
@@ -90,5 +91,9 @@ public class Butcher extends Craft {
     @Override
     public void acquireTool() {
 
+    }
+
+    public static double getWeight() {
+        return weight;
     }
 }

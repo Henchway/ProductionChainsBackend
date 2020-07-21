@@ -14,6 +14,8 @@ import java.util.List;
 
 public class Tanner extends Craft {
 
+    protected static Double weight = 11.0;
+
     public Tanner(Worker worker) {
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
@@ -54,5 +56,9 @@ public class Tanner extends Craft {
 
     @Override
     public void acquireTool() {
+    }
+
+    public static Double getWeight() {
+        return weight;
     }
 }

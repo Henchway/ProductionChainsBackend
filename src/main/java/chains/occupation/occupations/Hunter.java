@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Random;
 
 public class Hunter extends Labour {
+    private static double weight = 10.0;
     public Hunter(Worker worker) {
+
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }
@@ -48,5 +50,9 @@ public class Hunter extends Labour {
     @Override
     public void acquireTool() {
 
+    }
+
+    public static double getWeight() {
+        return weight;
     }
 }

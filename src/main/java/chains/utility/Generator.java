@@ -1,18 +1,22 @@
 package chains.utility;
 
+import chains.materials.Food;
 import chains.occupation.Work;
 import chains.occupation.occupations.*;
 import chains.worker.Worker;
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
+import org.reflections.Reflections;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class Generator {
 
@@ -39,7 +43,7 @@ public class Generator {
 
     public static int randomAge() {
 
-        return random.nextInt(10) + 1;
+        return random.nextInt(10) + 15;
 
     }
 
@@ -56,21 +60,50 @@ public class Generator {
 
     public static Work randomWork(Worker worker) {
 
-        int selection = random.nextInt(9);
+        /**
+         * The reflection library is used to get all classes which implement work
+         * As this also includes interfaces and abstract classes,
+         * these need to be removed later on
+         */
+        Reflections reflections = new Reflections("chains.occupation");
+        Set<Class<? extends Work>> classes = reflections.getSubTypesOf(Work.class);
+        classes.removeIf(clazz -> Modifier.isAbstract(clazz.getModifiers()) || clazz.isInterface());
 
-        return switch (selection) {
-            case 0 -> new Hunter(worker);
-            case 1 -> new Lumberjack(worker);
-            case 2 -> new Miner(worker);
-            case 3 -> new Shepherd(worker);
-            case 4 -> new Tanner(worker);
-            case 5 -> new Farmer(worker);
-            case 6 -> new Blacksmith(worker);
-            case 7 -> new Stonemason(worker);
-            case 8 -> new Butcher(worker);
-            default -> null;
+        /**
+         * In order to be able to weigh the different occupations, a Pair is being created for
+         * each Class with it's respective weight. It's important that each class has the
+         * static getWeight method implemented, as well as the static weight variable
+         * This variable can be changed to allow preference of certain occupations
+         */
+        final List<Pair<Class<? extends Work>, Double>> itemWeights = new ArrayList<>();
+        classes.forEach(aClass -> {
+            Double weight = 0.0;
+            try {
+                Method m = aClass.getMethod("getWeight");
+                weight = (Double) m.invoke(null);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            itemWeights.add(new Pair<>(aClass, weight));
 
-        };
+        });
+
+        /**
+         * With the weighted list available, the EnumeratedDistribution.sample() will select a weighted item
+         * This can be useful when priorities need to be shifted due to low resources.
+         */
+
+        Class<? extends Work> clazz = new EnumeratedDistribution<>(itemWeights).sample();
+        Work work = null;
+
+        try {
+            Class<Worker>[] cArg = new Class[]{Worker.class};
+            work = clazz.getDeclaredConstructor(cArg).newInstance(worker);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return work;
 
     }
 

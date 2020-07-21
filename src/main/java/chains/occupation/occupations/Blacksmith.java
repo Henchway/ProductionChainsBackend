@@ -5,6 +5,7 @@ import chains.worker.Worker;
 
 public class Blacksmith extends Craft {
 
+private static double weight = 10.0;
 
     public Blacksmith(Worker worker) {
         this.worker = worker;
@@ -20,4 +21,11 @@ public class Blacksmith extends Craft {
     public void acquireTool() {
 
     }
+
+    public static double getWeight() {
+        return weight;
+    }
+
+
+
 }

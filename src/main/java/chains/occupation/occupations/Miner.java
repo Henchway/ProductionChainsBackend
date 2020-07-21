@@ -14,8 +14,10 @@ import java.util.List;
 import java.util.Random;
 
 public class Miner extends Labour {
+    private static double weight = 10.0;
 
     public Miner(Worker worker) {
+
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }
@@ -56,5 +58,9 @@ public class Miner extends Labour {
     @Override
     public void acquireTool() {
 
+    }
+
+    public static double getWeight() {
+        return weight;
     }
 }
