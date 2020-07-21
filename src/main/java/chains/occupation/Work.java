@@ -1,11 +1,14 @@
 package chains.occupation;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Tool;
 import chains.materials.Warehouse;
 import chains.worker.Worker;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public abstract class Work {
 
@@ -13,7 +16,7 @@ public abstract class Work {
     protected Warehouse warehouse;
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
-    protected HashMap<Class<? extends Resource>, List<Resource>> localResourceStorage = new HashMap<>();
+    protected HashMap<Class<? extends Resource>, CopyOnWriteArrayList<Resource>> localResourceStorage = new HashMap<>();
 
     @Override
     public String toString() {
@@ -50,15 +53,24 @@ public abstract class Work {
     public <T extends Resource> void addResourceToLocalStorage(List<Resource> list) {
 
         if (!list.isEmpty()) {
-            Class<? extends Resource> resource = list.get(0).getClass();
+            list.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(resource -> {
 
-            // If the resource already exists in the warehouse, increase the number of stored pieces
-            if (localResourceStorage.containsKey(resource)) {
-                localResourceStorage.get(resource).addAll(list);
-            } else {
-                // Else simply add the received resource & amount
-                localResourceStorage.put(resource, list);
-            }
+                        Class<? extends Resource> aClass = resource.getClass();
+
+                        // If the resource already exists in the warehouse, increase the number of stored pieces
+                        if (localResourceStorage.containsKey(aClass)) {
+                            localResourceStorage.get(aClass).add(resource);
+                        } else {
+                            // Else simply add the received resource & amount
+                            CopyOnWriteArrayList<Resource> newList = new CopyOnWriteArrayList<>();
+                            newList.add(resource);
+                            localResourceStorage.put(aClass, newList);
+                        }
+
+                    });
+
         }
     }
 
@@ -93,5 +105,28 @@ public abstract class Work {
         }
         return list;
     }
+
+    public <T> List<Class<T>> getSpecificTypeOfResource(Class<T> clazz) {
+
+        return localResourceStorage.keySet()
+                .stream()
+                .filter(clazz::isAssignableFrom)
+                .map(aClass -> (Class<T>) aClass)
+                .collect(Collectors.toList());
+    }
+
+    public void ageLocallyHeldLifestock() {
+
+        List<Class<Lifestock>> lifestock = getSpecificTypeOfResource(Lifestock.class);
+        lifestock.forEach(lifestockClass -> {
+            localResourceStorage
+                    .get(lifestockClass)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(Lifestock.class::cast)
+                    .forEach(lifestock1 -> lifestock1.age(worker.getGameTimeline()));
+        });
+    }
+
 
 }

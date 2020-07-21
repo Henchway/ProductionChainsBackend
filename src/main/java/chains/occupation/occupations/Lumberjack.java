@@ -5,6 +5,7 @@ import chains.materials.raw.Tannin;
 import chains.materials.raw.Wood;
 import chains.occupation.Work;
 import chains.occupation.type.Labour;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
@@ -23,28 +24,27 @@ public class Lumberjack extends Labour {
 
     @Override
     public void produce() {
-        store(produceLumber());
-        store(produceTannin());
+        List<Resource> lumber = produceLumber();
+        store(lumber);
+        store(produceTannin(lumber.size()));
     }
 
     public List<Resource> produceLumber() {
 
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int wood = (random.nextInt(15) + 30) * efficiency;
+        int wood = (Generator.nextInt(15) + 30) * efficiency;
         for (int i = 0; i < wood; i++) {
             list.add(new Wood());
         }
         return list;
     }
 
-    public List<Resource> produceTannin() {
+    public List<Resource> produceTannin(double amount) {
 
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int tannin = (random.nextInt(5) + 5) * efficiency;
+        int tannin = (int) Math.ceil(amount/10) * efficiency;
 
-        for (int i = 0; i < tannin / 10; i++) {
+        for (int i = 0; i < tannin; i++) {
             list.add(new Tannin());
         }
         return list;

@@ -21,7 +21,7 @@ public class Statistics {
     private TreeMap<String, Integer> workMap;
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
-    Map<String, Integer> resources;
+    TreeMap<String, Integer> resources;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -83,13 +83,20 @@ public class Statistics {
 
         HashMap<Class<? extends Resource>, List<Resource>> resources = new HashMap<>(this.warehouse.getResources());
 
-        this.resources = resources
+//        this.resources = resources
+//                .entrySet()
+//                .stream()
+//                .collect(Collectors.toMap(
+//                        classListEntry -> classListEntry.getKey().getSimpleName(),
+//                        classListEntry -> classListEntry.getValue().size())
+//                );
+
+        this.resources = new TreeMap<>();
+        resources
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(
-                        classListEntry -> classListEntry.getKey().getSimpleName(),
-                        classListEntry -> classListEntry.getValue().size())
-                );
+                .filter(Objects::nonNull)
+                .forEach(classListEntry -> this.resources.put(classListEntry.getKey().getSimpleName(), classListEntry.getValue().size()));
 
 
     }

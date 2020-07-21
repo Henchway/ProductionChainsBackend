@@ -10,6 +10,7 @@ public class Sheep extends Lifestock {
     public Sheep() {
         this.meat = 8 + Generator.nextInt(5);
         this.wool = 5 + Generator.nextInt(5);
+        this.lifeExpectancy = 10 + Generator.nextInt(3);
     }
 
     public int getWool() {

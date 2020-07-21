@@ -5,16 +5,16 @@ import chains.materials.intermediate.Leather;
 import chains.materials.raw.Hide;
 import chains.materials.raw.Tannin;
 import chains.occupation.type.Craft;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class Tanner extends Craft {
 
-    protected static Double weight = 11.0;
+    protected static Double weight = 5.0;
 
     public Tanner(Worker worker) {
         this.worker = worker;
@@ -24,14 +24,19 @@ public class Tanner extends Craft {
     @Override
     public void produce() {
 
+        retrieveResourcesforLeather();
         store(produceLeather());
 
     }
 
-    public List<Resource> produceLeather() {
 
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Tannin.class, 2L * efficiency));
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Hide.class, 10L * efficiency));
+    public void retrieveResourcesforLeather() {
+        addResourceToLocalStorage(warehouse.retrieveResourceAmountFromWarehouse(Tannin.class, 2L * efficiency));
+        addResourceToLocalStorage(warehouse.retrieveResourceAmountFromWarehouse(Hide.class, 10L * efficiency));
+    }
+
+
+    public List<Resource> produceLeather() {
 
         List<Resource> list = new ArrayList<>();
 
@@ -40,11 +45,11 @@ public class Tanner extends Craft {
          * Efficiency raises the amount of leather retrieved and produced at once
          */
 
-        for (int i = 0; i < localResourceStorage.getOrDefault(Tannin.class, Collections.emptyList()).size(); i++) {
-            for (int j = 0; j < localResourceStorage.getOrDefault(Hide.class, Collections.emptyList()).size(); j = j + 5) {
-                retrieveResourceFromLocalStorage(Tannin.class, 1L);
-                retrieveResourceFromLocalStorage(Hide.class, 5L);
-                for (int k = 0; k < 5; k++) {
+        for (int i = 0; i < localResourceStorage.getOrDefault(Tannin.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size(); i = i + efficiency) {
+            for (int j = 0; j < localResourceStorage.getOrDefault(Hide.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size(); j = j + 5 * efficiency) {
+                retrieveResourceFromLocalStorage(Tannin.class, (long) efficiency);
+                retrieveResourceFromLocalStorage(Hide.class, 5L * efficiency);
+                for (int k = 0; k < 5 * efficiency; k++) {
                     list.add(new Leather());
                 }
             }

@@ -6,6 +6,7 @@ import chains.occupation.occupations.*;
 import chains.worker.Worker;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.spi.CopyOnWrite;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -17,13 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Generator {
 
     static Random random = new Random();
     static List<String> maleNames;
     static List<String> femaleNames;
-
 
     public static char randomGender() {
 
@@ -71,7 +72,7 @@ public class Generator {
 
         /**
          * In order to be able to weigh the different occupations, a Pair is being created for
-         * each Class with it's respective weight. It's important that each class has the
+         * each Class with it's respective weight. It's important that each weighed class has the
          * static getWeight method implemented, as well as the static weight variable
          * This variable can be changed to allow preference of certain occupations
          */
@@ -89,7 +90,7 @@ public class Generator {
         });
 
         /**
-         * With the weighted list available, the EnumeratedDistribution.sample() will select a weighted item
+         * With the weighed list available, the EnumeratedDistribution.sample() will select a weighed item
          * This can be useful when priorities need to be shifted due to low resources.
          */
 
@@ -120,7 +121,7 @@ public class Generator {
             maleNames = readFileIntoList("FirstNames_male.txt");
         }
 
-        return (String) maleNames.get(random.nextInt(maleNames.size()));
+        return maleNames.get(random.nextInt(maleNames.size()));
 
     }
 
@@ -169,6 +170,10 @@ public class Generator {
 
     }
 
+    public static <T> CopyOnWriteArrayList<T> createEmptyCopyOnWriteList (Class<T> clazz) {
+        return new CopyOnWriteArrayList<>();
+    }
+
 
     public static List<String> readFileIntoList(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
@@ -184,5 +189,6 @@ public class Generator {
         }
         return lines;
     }
+
 
 }

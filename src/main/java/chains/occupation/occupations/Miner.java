@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Miner extends Labour {
-    private static double weight = 10.0;
+    private static double weight = 5.0;
 
     public Miner(Worker worker) {
 

@@ -4,7 +4,7 @@ import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
 public class Stonemason extends Labour {
-    private static double weight = 10.0;
+    private static double weight = 5.0;
 
     public Stonemason(Worker worker) {
 

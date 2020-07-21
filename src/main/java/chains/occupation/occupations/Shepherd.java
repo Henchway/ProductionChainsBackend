@@ -1,10 +1,12 @@
 package chains.occupation.occupations;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.lifestock.Sheep;
 import chains.materials.raw.Meat;
 import chains.materials.raw.Wool;
 import chains.occupation.type.Labour;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.*;
@@ -29,8 +31,8 @@ public class Shepherd extends Labour {
     public void retrieveLifestock() {
 
         Random random = new Random();
-        if (localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() < 50) {
-            addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Sheep.class, random.nextInt(5) + 5L * efficiency));
+        if (localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size() < 50) {
+            addResourceToLocalStorage(warehouse.retrieveResourceAmountFromWarehouse(Sheep.class, random.nextInt(5) + 5L * efficiency));
         }
     }
 
@@ -38,10 +40,11 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList()).size() / 3)
+        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size())
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)
+                .filter(Lifestock::isReadyForSlaughter)
                 .collect(Collectors.toList());
 
         sheepList.forEach(sheep -> {
@@ -58,7 +61,7 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Collections.emptyList())
+        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class))
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)

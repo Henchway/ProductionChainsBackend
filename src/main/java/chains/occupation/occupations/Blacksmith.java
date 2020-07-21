@@ -5,7 +5,7 @@ import chains.worker.Worker;
 
 public class Blacksmith extends Craft {
 
-private static double weight = 10.0;
+private static double weight = 0.0;
 
     public Blacksmith(Worker worker) {
         this.worker = worker;

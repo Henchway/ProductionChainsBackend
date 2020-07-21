@@ -1,5 +1,6 @@
 package chains.occupation.occupations;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.lifestock.Chicken;
 import chains.materials.lifestock.Cow;
@@ -7,15 +8,16 @@ import chains.materials.lifestock.Pig;
 import chains.materials.lifestock.Sheep;
 import chains.occupation.Work;
 import chains.occupation.type.Labour;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Farmer extends Labour {
-    private static double weight = 10.0;
+
+    private static double weight = 20.0;
+
     public Farmer(Worker worker) {
 
         this.worker = worker;
@@ -24,17 +26,33 @@ public class Farmer extends Labour {
 
     @Override
     public void produce() {
-        store(acquireChickenLifestock());
-        store(acquireCowLifestock());
-        store(acquirePigLifestock());
+
+        ageLocallyHeldLifestock();
+        addResourceToLocalStorage(acquireCowLifestock());
+        addResourceToLocalStorage(acquireChickenLifestock());
+        addResourceToLocalStorage(acquirePigLifestock());
+
+        List<Resource> readyForSlaughterLifestock = localResourceStorage.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .map(Lifestock.class::cast)
+                .filter(Lifestock::isReadyForSlaughter)
+                .map(Resource.class::cast)
+                .collect(Collectors.toList());
+
+        readyForSlaughterLifestock.forEach(lifestock1 -> {
+                    localResourceStorage.get(lifestock1.getClass()).remove(lifestock1);
+                }
+        );
+
+        store(readyForSlaughterLifestock);
         store(acquireSheepLifestock());
     }
 
     public List<Resource> acquireChickenLifestock() {
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int lifestock = (random.nextInt(5) + 5) * efficiency;
-
+        int lifestock = (Generator.nextInt(5) + 5) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Chicken());
         }
@@ -44,9 +62,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquireCowLifestock() {
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int lifestock = (random.nextInt(2) + 2) * efficiency;
-
+        int lifestock = (Generator.nextInt(2) + 1) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Cow());
         }
@@ -56,9 +72,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquirePigLifestock() {
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int lifestock = (random.nextInt(2) + 3) * efficiency;
-
+        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Pig());
         }
@@ -68,9 +82,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquireSheepLifestock() {
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int lifestock = (random.nextInt(2) + 3) * efficiency;
-
+        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Sheep());
         }

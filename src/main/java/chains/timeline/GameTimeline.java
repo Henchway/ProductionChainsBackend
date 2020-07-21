@@ -1,5 +1,6 @@
 package chains.timeline;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Warehouse;
 import chains.materials.raw.Meat;
@@ -9,8 +10,12 @@ import chains.utility.Statistics;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 
 public class GameTimeline {
@@ -29,20 +34,11 @@ public class GameTimeline {
 
     public void processNewYear() {
 
-        for (Worker worker : workersList) {
+        workersList.stream()
+                .filter(Worker::isAlive)
+                .forEach(Worker::lifecycle);
 
-            if (worker.isAlive()) {
-                worker.age();
-                worker.checkAdulthood();
-                worker.findPartner();
-                worker.procreate();
-                worker.work();
-                worker.eat();
-                worker.checkHealth();
-            }
-
-        }
-
+        ageLifestock();
         workerMigrates(workersList.size());
         statistics.generateWorkerStatistics();
         statistics.getWarehouseResources();
@@ -68,6 +64,24 @@ public class GameTimeline {
 
         warehouse.addResourceToWarehouse(meat);
         warehouse.addResourceToWarehouse(milk);
+
+    }
+
+    public void ageLifestock() {
+        List<Class<? extends Resource>> list = getWarehouse().getResources()
+                .keySet()
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(Lifestock.class::isAssignableFrom)
+                .collect(Collectors.toList());
+
+        list.forEach(aClass -> {
+            getWarehouse().getResources().get(aClass)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(Lifestock.class::cast)
+                    .forEach(lifestock -> lifestock.age(this));
+        });
 
     }
 

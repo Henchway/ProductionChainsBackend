@@ -1,21 +1,21 @@
 package chains.occupation.occupations;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.lifestock.Chicken;
 import chains.materials.lifestock.Cow;
 import chains.materials.lifestock.Pig;
 import chains.materials.raw.Meat;
 import chains.occupation.type.Craft;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Butcher extends Craft {
-    private static double weight = 10.0;
+    private static double weight = 15.0;
+
     public Butcher(Worker worker) {
 
         this.worker = worker;
@@ -26,61 +26,53 @@ public class Butcher extends Craft {
     @Override
     public void produce() {
 
-        retrieveLifestock();
+        addResourceToLocalStorage(retrieveReadyForSlaughterLifestockFromWarehouse());
         store(produceMeat());
 
     }
 
-    // Improvement: take random lifestock which is older than half it's life expectancy
-    public void retrieveLifestock() {
+    public List<Resource> retrieveReadyForSlaughterLifestockFromWarehouse() {
 
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Pig.class, 10L * efficiency));
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Cow.class, 5L * efficiency));
-        addResourceToLocalStorage(warehouse.retrieveResourceFromWarehouse(Chicken.class, 20L * efficiency));
+        List<Class<Lifestock>> lifestockList = warehouse.getSpecificTypeOfResource(Lifestock.class);
+        List<Resource> retrievedLifestock = new ArrayList<>();
+
+        lifestockList.forEach(aClass -> {
+
+            retrievedLifestock.addAll(warehouse.getResources()
+                    .get(aClass)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(Lifestock.class::cast)
+                    .filter(Lifestock::isReadyForSlaughter)
+                    .limit(10 + Generator.nextInt(5))
+                    .map(Resource.class::cast)
+                    .collect(Collectors.toList()));
+        });
+
+        retrievedLifestock.forEach(resource -> {
+            warehouse.removeResourceFromWarehouse(resource);
+        });
+
+        return retrievedLifestock;
 
     }
 
 
     public List<Resource> produceMeat() {
 
-
         List<Resource> meatList = new ArrayList<>();
+        List<Class<Lifestock>> lifestock = getSpecificTypeOfResource(Lifestock.class);
 
-        List<Cow> cowList = retrieveResourceFromLocalStorage(Cow.class, (long) localResourceStorage.getOrDefault(Cow.class, Collections.emptyList()).size())
-                .stream()
-                .filter(Objects::nonNull)
-                .map(Cow.class::cast)
-                .collect(Collectors.toList());
-
-        cowList.forEach(animal -> {
-            for (int i = 0; i < animal.getMeat(); i++) {
-                meatList.add(new Meat());
-            }
-        });
-
-        List<Pig> pigList = retrieveResourceFromLocalStorage(Pig.class, (long) localResourceStorage.getOrDefault(Pig.class, Collections.emptyList()).size())
-                .stream()
-                .filter(Objects::nonNull)
-                .map(Pig.class::cast)
-                .collect(Collectors.toList());
-
-
-        pigList.forEach(animal -> {
-            for (int i = 0; i < animal.getMeat(); i++) {
-                meatList.add(new Meat());
-            }
-        });
-
-        List<Chicken> chickenList = retrieveResourceFromLocalStorage(Chicken.class, (long) localResourceStorage.getOrDefault(Chicken.class, Collections.emptyList()).size())
-                .stream()
-                .filter(Objects::nonNull)
-                .map(Chicken.class::cast)
-                .collect(Collectors.toList());
-
-        chickenList.forEach(animal -> {
-            for (int i = 0; i < animal.getMeat(); i++) {
-                meatList.add(new Meat());
-            }
+        lifestock.forEach(lifestockClass -> {
+            retrieveResourceFromLocalStorage(lifestockClass, (long) localResourceStorage
+                    .getOrDefault(lifestockClass, Generator.createEmptyCopyOnWriteList(Resource.class)).size())
+                    .stream()
+                    .map(Lifestock.class::cast)
+                    .forEach(lifestock1 -> {
+                        for (int i = 0; i < lifestock1.getMeat(); i++) {
+                            meatList.add(new Meat());
+                        }
+                    });
         });
 
         return meatList;

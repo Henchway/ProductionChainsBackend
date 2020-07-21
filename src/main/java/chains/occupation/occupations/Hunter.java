@@ -5,6 +5,7 @@ import chains.materials.raw.Hide;
 import chains.materials.raw.Meat;
 import chains.occupation.Work;
 import chains.occupation.type.Labour;
+import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Hunter extends Labour {
-    private static double weight = 10.0;
+    private static double weight = 15.0;
     public Hunter(Worker worker) {
 
         this.worker = worker;
@@ -30,8 +31,7 @@ public class Hunter extends Labour {
     public List<Resource> produceHide() {
 
         List<Resource> list = new ArrayList<>();
-        Random random = new Random();
-        int deer = (random.nextInt(10) + 10) * efficiency;
+        int deer = (Generator.nextInt(10) + 10) * efficiency;
         for (int i = 0; i < deer; i++) {
             list.add(new Hide());
         }

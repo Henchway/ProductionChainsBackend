@@ -77,6 +77,16 @@ public class Worker {
         }
     }
 
+    public void lifecycle() {
+        age();
+        checkAdulthood();
+        findPartner();
+        procreate();
+        work();
+        eat();
+        checkHealth();
+    }
+
     String selectName(char gender) {
 
         if (gender == 'f') {
@@ -227,7 +237,7 @@ public class Worker {
     public void die(String reason) {
 
         isAlive = false;
-        System.out.println(ANSI_RED + this + " has died of " + reason + " in the year " + gameTimeline.getStatistics().getCurrentYear() + ANSI_RESET);
+//        System.out.println(ANSI_RED + this + " has died of " + reason + " in the year " + gameTimeline.getStatistics().getCurrentYear() + ANSI_RESET);
 //        System.out.println(obituary());
 
         if (hasPartner()) {
