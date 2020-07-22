@@ -1,16 +1,14 @@
 package chains.materials;
 
-import chains.Main;
-import chains.db.LifestockDbController;
-import chains.timeline.GameTimeline;
-import com.fasterxml.jackson.databind.util.BeanUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Getter
+@Setter
 public abstract class Lifestock implements Resource {
 
     @Id
@@ -21,31 +19,8 @@ public abstract class Lifestock implements Resource {
     protected int meat;
     protected boolean readyForSlaughter;
     protected boolean isAlive = true;
+    protected Class<?> clazz = this.getClass();
 
-
-    public int getLifeExpectancy() {
-        return lifeExpectancy;
-    }
-
-    public void setLifeExpectancy(int lifeExpectancy) {
-        this.lifeExpectancy = lifeExpectancy;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public int getMeat() {
-        return meat;
-    }
-
-    public void setMeat(int meat) {
-        this.meat = meat;
-    }
 
     /**
      * Age all lifestock
@@ -63,22 +38,6 @@ public abstract class Lifestock implements Resource {
     public void die() {
         isAlive = false;
 //        System.out.println("A " + this.getClass().getSimpleName() + " has died at the age of " + age);
-    }
-
-    public boolean isReadyForSlaughter() {
-        return readyForSlaughter;
-    }
-
-    public boolean isAlive() {
-        return isAlive;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
 }

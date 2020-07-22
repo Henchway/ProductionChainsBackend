@@ -6,21 +6,31 @@ import chains.materials.Resource;
 import chains.materials.Tool;
 import chains.materials.Warehouse;
 import chains.worker.Worker;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
+
+@Getter
+@Setter
 public abstract class Work {
+
 
     protected Worker worker;
     protected Warehouse warehouse;
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
     protected HashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> localResourceStorage = new HashMap<>();
+    protected LifestockDbController lifestockDbController;
 
+    @Autowired
+    public final void setLifestockDbController(LifestockDbController lifestockDbController) {
+        this.lifestockDbController = lifestockDbController;
+    }
 
     @Override
     public String toString() {
@@ -75,26 +85,6 @@ public abstract class Work {
                     }
                 });
 
-//        if (!list.isEmpty()) {
-//            list.stream()
-//                    .filter(Objects::nonNull)
-//                    .forEach(resource -> {
-//
-//                        Class<? extends Resource> aClass = resource.getClass();
-//
-//                        // If the resource already exists in the warehouse, increase the number of stored pieces
-//                        if (localResourceStorage.containsKey(aClass)) {
-//                            localResourceStorage.get(aClass).add(resource);
-//                        } else {
-//                            // Else simply add the received resource & amount
-//                            CopyOnWriteArrayList<Resource> newList = new CopyOnWriteArrayList<>();
-//                            newList.add(resource);
-//                            localResourceStorage.put(aClass, newList);
-//                        }
-//
-//                    });
-//
-//        }
     }
 
     public <T extends Resource> List<Resource> retrieveResourceFromLocalStorage(Class<T> requestedResource, Long amount) {
@@ -108,24 +98,6 @@ public abstract class Work {
                 retrievedResources.add(itemsInMap.poll());
             }
         }
-
-//        List<Resource> retrievedResources = new ArrayList<>();
-//        List<Resource> itemsInMap = localResourceStorage.get(requestedResource);
-//
-//        if (localResourceStorage.containsKey(requestedResource)) {
-//            if (itemsInMap.size() < amount) {
-//                retrievedResources.addAll(itemsInMap);
-//                localResourceStorage.remove(requestedResource);
-//            } else {
-//                List<Resource> list = new ArrayList<>();
-//                for (int i = 0; i < amount; i++) {
-//                    list.add(itemsInMap.get(itemsInMap.size() - 1));
-//                    itemsInMap.remove(itemsInMap.size() - 1);
-//                }
-//                retrievedResources.addAll(list);
-//            }
-//        }
-
         return retrievedResources;
     }
 
@@ -184,5 +156,6 @@ public abstract class Work {
     public HashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> getLocalResourceStorage() {
         return localResourceStorage;
     }
+
 
 }

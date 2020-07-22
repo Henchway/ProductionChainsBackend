@@ -1,5 +1,6 @@
 package chains.utility;
 
+import chains.Main;
 import chains.materials.Food;
 import chains.occupation.Work;
 import chains.occupation.occupations.*;
@@ -8,6 +9,7 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.spi.CopyOnWrite;
 import org.reflections.Reflections;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Component
 public class Generator {
 
     static Random random = new Random();
@@ -106,16 +109,15 @@ public class Generator {
         }
 
         Class<? extends Work> clazz = new EnumeratedDistribution<>(workWeight).sample();
-        Work work = null;
+        //
+//        try {
+//            Class<Worker>[] cArg = new Class[]{Worker.class};
+//            work = clazz.getDeclaredConstructor(cArg).newInstance(worker);
+//        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+//            e.printStackTrace();
+//        }
 
-        try {
-            Class<Worker>[] cArg = new Class[]{Worker.class};
-            work = clazz.getDeclaredConstructor(cArg).newInstance(worker);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-
-        return work;
+        return Main.applicationContext.getBean(clazz);
 
     }
 

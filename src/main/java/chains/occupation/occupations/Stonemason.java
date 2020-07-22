@@ -2,7 +2,11 @@ package chains.occupation.occupations;
 
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public class Stonemason extends Labour {
     private static double weight = 5.0;
 

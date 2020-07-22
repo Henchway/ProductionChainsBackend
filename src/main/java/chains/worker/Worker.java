@@ -3,9 +3,14 @@ package chains.worker;
 import chains.occupation.Work;
 import chains.timeline.GameTimeline;
 import chains.utility.Generator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
+@Component
+@Scope("prototype")
 public class Worker {
 
 
@@ -38,7 +43,8 @@ public class Worker {
      * Worker gets born
      */
 
-    public Worker(GameTimeline gameTimeline, boolean migrated) {
+
+    public Worker(GameTimeline gameTimeline, @Value("false") boolean migrated) {
 
         this.gameTimeline = gameTimeline;
         this.gameTimeline.addWorkerToList(this);

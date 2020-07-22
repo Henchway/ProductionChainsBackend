@@ -9,6 +9,8 @@ import chains.materials.lifestock.Sheep;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Component
+@Scope("prototype")
 public class Farmer extends Labour {
 
     private static double weight = 60.0;
@@ -33,14 +37,13 @@ public class Farmer extends Labour {
         addResourceToLocalStorage(acquireChickenLifestock());
         addResourceToLocalStorage(acquirePigLifestock());
 
-        List<Resource> readyForSlaughterLifestock = localResourceStorage.values()
+        List<Lifestock> readyForSlaughterLifestock = localResourceStorage.values()
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .filter(resource -> Lifestock.class.isAssignableFrom(resource.getClass()))
                 .map(Lifestock.class::cast)
                 .filter(Lifestock::isReadyForSlaughter)
-                .map(Resource.class::cast)
                 .collect(Collectors.toList());
 
         readyForSlaughterLifestock.forEach(lifestock1 -> {
@@ -48,8 +51,10 @@ public class Farmer extends Labour {
                 }
         );
 
-        storeDifferentTypes(readyForSlaughterLifestock);
-        storeSameTypes(acquireSheepLifestock());
+        lifestockDbController.saveListToDb(readyForSlaughterLifestock);
+        lifestockDbController.saveListToDb(acquireSheepLifestock());
+
+
     }
 
     public List<Resource> acquireChickenLifestock() {
@@ -82,8 +87,8 @@ public class Farmer extends Labour {
 
     }
 
-    public List<Resource> acquireSheepLifestock() {
-        List<Resource> list = new ArrayList<>();
+    public List<Lifestock> acquireSheepLifestock() {
+        List<Lifestock> list = new ArrayList<>();
         int lifestock = (Generator.nextInt(2) + 4) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Sheep());

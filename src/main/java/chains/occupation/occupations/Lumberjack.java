@@ -6,10 +6,13 @@ import chains.materials.raw.Wood;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
+@Scope("prototype")
 public class Lumberjack extends Labour {
     private static double weight = 10.0;
 

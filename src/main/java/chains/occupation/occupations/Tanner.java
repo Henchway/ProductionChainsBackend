@@ -7,10 +7,14 @@ import chains.materials.raw.Tannin;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
+@Scope("prototype")
 public class Tanner extends Craft {
 
     protected static Double weight = 5.0;

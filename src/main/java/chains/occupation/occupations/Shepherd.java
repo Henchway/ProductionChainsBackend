@@ -8,12 +8,15 @@ import chains.materials.raw.Wool;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+@Component
+@Scope("prototype")
 public class Shepherd extends Labour {
     private static double weight = 10.0;
 

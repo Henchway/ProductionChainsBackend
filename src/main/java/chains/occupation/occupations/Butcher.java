@@ -1,18 +1,18 @@
 package chains.occupation.occupations;
 
-import chains.Main;
-import chains.db.LifestockDbController;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.raw.Meat;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
+@Scope("prototype")
 public class Butcher extends Craft {
     private static double weight = Farmer.getWeight() * 1.1;
 

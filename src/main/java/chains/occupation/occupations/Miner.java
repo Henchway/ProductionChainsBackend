@@ -5,11 +5,14 @@ import chains.materials.raw.Coal;
 import chains.materials.raw.IronOre;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+@Component
+@Scope("prototype")
 public class Miner extends Labour {
     private static double weight = 5.0;
 
