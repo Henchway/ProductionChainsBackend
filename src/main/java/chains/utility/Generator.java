@@ -25,6 +25,7 @@ public class Generator {
     static Random random = new Random();
     static List<String> maleNames;
     static List<String> femaleNames;
+    static List<Pair<Class<? extends Work>, Double>> workWeight = null;
 
     public static char randomGender() {
 
@@ -58,8 +59,7 @@ public class Generator {
         return random.nextInt(26);
     }
 
-
-    public static Work randomWork(Worker worker) {
+    public static void generateWorkWeight() {
 
         /**
          * The reflection library is used to get all classes which implement work
@@ -89,12 +89,22 @@ public class Generator {
 
         });
 
+        workWeight = itemWeights;
+
+    }
+
+    public static Work randomWork(Worker worker) {
+
+
         /**
          * With the weighed list available, the EnumeratedDistribution.sample() will select a weighed item
          * This can be useful when priorities need to be shifted due to low resources.
          */
+        if (workWeight == null) {
+            generateWorkWeight();
+        }
 
-        Class<? extends Work> clazz = new EnumeratedDistribution<>(itemWeights).sample();
+        Class<? extends Work> clazz = new EnumeratedDistribution<>(workWeight).sample();
         Work work = null;
 
         try {
@@ -170,7 +180,7 @@ public class Generator {
 
     }
 
-    public static <T> CopyOnWriteArrayList<T> createEmptyCopyOnWriteList (Class<T> clazz) {
+    public static <T> CopyOnWriteArrayList<T> createEmptyCopyOnWriteList(Class<T> clazz) {
         return new CopyOnWriteArrayList<>();
     }
 

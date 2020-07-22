@@ -27,10 +27,8 @@ public class TimelineRestServiceController {
     @PostMapping("/start")
     public ResponseEntity<Object> startTimeline() {
 
-
         gameTimeline.setStatistics(statistics);
         gameTimeline.startPopulation();
-//        statistics.generateWorkerStatistics();
         createTimer();
         return new ResponseEntity<>(HttpStatus.OK);
 

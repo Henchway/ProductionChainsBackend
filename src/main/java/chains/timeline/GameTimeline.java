@@ -22,9 +22,9 @@ public class GameTimeline {
 
     private final CopyOnWriteArrayList<Worker> workersList = new CopyOnWriteArrayList<>();
     private static int yearsPassed = 0;
-    private final static int durationOfYear = 300;
+    private final static int durationOfYear = 50;
     private Statistics statistics;
-    private int population;
+    private int population = 1;
     private Warehouse warehouse;
 
 
@@ -34,7 +34,9 @@ public class GameTimeline {
 
     public void processNewYear() {
 
-        workersList.stream()
+        long start = System.nanoTime();
+
+        workersList.parallelStream()
                 .filter(Worker::isAlive)
                 .forEach(Worker::lifecycle);
 
@@ -43,6 +45,12 @@ public class GameTimeline {
         statistics.generateWorkerStatistics();
         statistics.getWarehouseResources();
 
+        long end = System.nanoTime();
+
+        long timeElapsed = end - start;
+
+        System.out.println("Execution time in milliseconds : " +
+                timeElapsed / 1000000);
     }
 
     public void startPopulation() {
@@ -57,7 +65,7 @@ public class GameTimeline {
 
         List<Resource> meat = new ArrayList<>();
         List<Resource> milk = new ArrayList<>();
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 500 * population; i++) {
             meat.add(new Meat());
             milk.add(new Milk());
         }
@@ -82,7 +90,7 @@ public class GameTimeline {
                     .map(Lifestock.class::cast)
                     .forEach(lifestock -> lifestock.age(this));
         });
-
+        warehouse.bulkRemoveResourceFromWarehouse();
     }
 
 

@@ -31,7 +31,7 @@ public class Hunter extends Labour {
     public List<Resource> produceHide() {
 
         List<Resource> list = new ArrayList<>();
-        int deer = (Generator.nextInt(10) + 10) * efficiency;
+        int deer = Generator.nextInt(10) + 10 * efficiency;
         for (int i = 0; i < deer; i++) {
             list.add(new Hide());
         }

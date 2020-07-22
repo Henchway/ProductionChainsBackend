@@ -126,6 +126,7 @@ public abstract class Work {
                     .map(Lifestock.class::cast)
                     .forEach(lifestock1 -> lifestock1.age(worker.getGameTimeline()));
         });
+        warehouse.bulkRemoveResourceFromWarehouse();
     }
 
 

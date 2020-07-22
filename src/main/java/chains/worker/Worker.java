@@ -146,26 +146,25 @@ public class Worker {
                 && Generator.randomBoolean()
                 && Generator.randomBoolean()) {
 
-            for (Worker worker : gameTimeline.getWorkersList()) {
+            Worker match = gameTimeline.getWorkersList()
+                    .stream()
+                    .unordered()
+                    .filter(worker -> !worker.hasPartner()
+                            && worker.isAlive
+                            && Math.abs(worker.getHealth() - worker.getAge()) > 10 // Partners on the brink of death won't be chosen
+                            && this.getGender() != worker.getGender()
+                            && worker.getAge() > 15
+                            && (Math.abs(worker.age - this.age) < 20)
+                            && !siblings.contains(worker)
+                            && !parents.contains(worker)
+                    )
+                    .findAny()
+                    .orElse(null);
 
-                if (!worker.hasPartner()
-                        && worker.isAlive
-                        && Math.abs(worker.getHealth() - worker.getAge()) > 10 // Partners on the brink of death won't be chosen
-                        && this.getGender() != worker.getGender()
-                        && worker.getAge() > 15
-                        && (Math.abs(worker.age - this.age) < 20)
-                        && !siblings.contains(worker)
-                        && !parents.contains(worker)) {
-
-                    setPartner(worker);
-                    worker.setPartner(this);
-
-                    break;
-
-                }
-
+            if (match != null) {
+                setPartner(match);
+                match.setPartner(this);
             }
-
 
         }
 
@@ -224,8 +223,8 @@ public class Worker {
 
     public void eat() {
 
-        int requiredEnergy = isAdult ? 10 : (age > 9 ? 4 : 2);
-        boolean starvationImminent = gameTimeline.getWarehouse().retrieveFoodFromWarehouse(requiredEnergy).isEmpty();
+        int requiredEnergy = isAdult ? 50 : (age > 9 ? 20 : 10);
+        boolean starvationImminent = gameTimeline.getWarehouse().retrieveFoodFromWarehouse(requiredEnergy);
         if (starvationImminent && starving) {
             die("Starvation");
         }

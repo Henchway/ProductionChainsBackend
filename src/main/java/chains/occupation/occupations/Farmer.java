@@ -36,6 +36,7 @@ public class Farmer extends Labour {
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
+                .filter(resource -> Lifestock.class.isAssignableFrom(resource.getClass()))
                 .map(Lifestock.class::cast)
                 .filter(Lifestock::isReadyForSlaughter)
                 .map(Resource.class::cast)

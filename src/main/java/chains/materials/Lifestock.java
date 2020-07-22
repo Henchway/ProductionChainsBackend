@@ -50,7 +50,7 @@ public abstract class Lifestock implements Resource {
     }
 
     public void die(GameTimeline gameTimeline) {
-        gameTimeline.getWarehouse().removeResourceFromWarehouse(this);
+        gameTimeline.getWarehouse().getResourcesToBeRemoved().add(this);
 //        System.out.println("A " + this.getClass().getSimpleName() + " has died at the age of " + age);
     }
 
