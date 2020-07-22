@@ -6,13 +6,14 @@ import chains.timeline.GameTimeline;
 import chains.worker.Worker;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 
 public class Statistics {
 
-    private CopyOnWriteArrayList<Worker> workersStatisticsList;
+    private HashSet<Worker> workersStatisticsList;
     private long workersCount;
     private long femaleWorkersCount;
     private long maleWorkersCount;
@@ -28,10 +29,15 @@ public class Statistics {
         this.warehouse = this.gameTimeline.getWarehouse();
     }
 
+    public void refreshStatistics() {
+        generateWorkerStatistics();
+        getWarehouseResources();
+    }
+
 
     public void generateWorkerStatistics() {
 
-        workersStatisticsList = new CopyOnWriteArrayList<>(gameTimeline.getWorkersList());
+        workersStatisticsList = new HashSet<>(gameTimeline.getWorkersList());
         currentYear = GameTimeline.getYearsPassed();
         workersCount = workersStatisticsList.size();
         femaleWorkersCount = workersStatisticsList.stream()
@@ -81,23 +87,15 @@ public class Statistics {
 
     public void getWarehouseResources() {
 
-        HashMap<Class<? extends Resource>, List<Resource>> resources = new HashMap<>(this.warehouse.getResources());
-
-//        this.resources = resources
-//                .entrySet()
-//                .stream()
-//                .collect(Collectors.toMap(
-//                        classListEntry -> classListEntry.getKey().getSimpleName(),
-//                        classListEntry -> classListEntry.getValue().size())
-//                );
+        ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resources = new ConcurrentHashMap<>(this.warehouse.getWarehouseStorage());
 
         this.resources = new TreeMap<>();
         resources
                 .entrySet()
                 .stream()
                 .filter(Objects::nonNull)
-                .forEach(classListEntry -> this.resources.put(classListEntry.getKey().getSimpleName(), classListEntry.getValue().size()));
-
+                .forEach(classListEntry -> this.resources.put(classListEntry.getKey().getSimpleName(),
+                        classListEntry.getValue().size()));
 
     }
 

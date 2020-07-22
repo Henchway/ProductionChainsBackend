@@ -9,27 +9,24 @@ import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 
 public class GameTimeline {
 
-    private final CopyOnWriteArrayList<Worker> workersList = new CopyOnWriteArrayList<>();
+    private final Set<Worker> workersList;
     private static int yearsPassed = 0;
     private final static int durationOfYear = 50;
     private Statistics statistics;
-    private int population = 1;
+    private int population = 1000;
     private Warehouse warehouse;
 
 
     public GameTimeline(Warehouse warehouse) {
         this.warehouse = warehouse;
+        this.workersList = ConcurrentHashMap.newKeySet();
     }
 
     public void processNewYear() {
@@ -42,8 +39,6 @@ public class GameTimeline {
 
         ageLifestock();
         workerMigrates(workersList.size());
-        statistics.generateWorkerStatistics();
-        statistics.getWarehouseResources();
 
         long end = System.nanoTime();
 
@@ -76,7 +71,7 @@ public class GameTimeline {
     }
 
     public void ageLifestock() {
-        List<Class<? extends Resource>> list = getWarehouse().getResources()
+        List<Class<? extends Resource>> list = getWarehouse().getWarehouseStorage()
                 .keySet()
                 .stream()
                 .filter(Objects::nonNull)
@@ -84,7 +79,7 @@ public class GameTimeline {
                 .collect(Collectors.toList());
 
         list.forEach(aClass -> {
-            getWarehouse().getResources().get(aClass)
+            getWarehouse().getWarehouseStorage().get(aClass)
                     .stream()
                     .filter(Objects::nonNull)
                     .map(Lifestock.class::cast)
@@ -130,7 +125,7 @@ public class GameTimeline {
         workersList.remove(worker);
     }
 
-    public CopyOnWriteArrayList<Worker> getWorkersList() {
+    public Set<Worker> getWorkersList() {
         return workersList;
     }
 

@@ -2,16 +2,15 @@ package chains.occupation.occupations;
 
 import chains.materials.Lifestock;
 import chains.materials.Resource;
-import chains.materials.lifestock.Chicken;
-import chains.materials.lifestock.Cow;
-import chains.materials.lifestock.Pig;
 import chains.materials.raw.Meat;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Butcher extends Craft {
     private static double weight = 15.0;
@@ -34,26 +33,34 @@ public class Butcher extends Craft {
     public List<Resource> retrieveReadyForSlaughterLifestockFromWarehouse() {
 
         List<Class<Lifestock>> lifestockList = warehouse.getSpecificTypeOfResource(Lifestock.class);
-        List<Resource> retrievedLifestock = new ArrayList<>();
+        ConcurrentLinkedQueue<Resource> retrievedLifestock = new ConcurrentLinkedQueue<>();
+        List<Resource> lifestockToSlaughter = new ArrayList<>();
+        List<Resource> lifestockToReturn = new ArrayList<>();
 
         lifestockList.forEach(aClass -> {
 
-            retrievedLifestock.addAll(warehouse.getResources()
-                    .get(aClass)
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(Lifestock.class::cast)
-                    .filter(Lifestock::isReadyForSlaughter)
-                    .limit(10 + Generator.nextInt(5))
-                    .map(Resource.class::cast)
-                    .collect(Collectors.toList()));
+            for (int i = 0; i < 10 + Generator.nextInt(5); i++) {
+                Resource resource = warehouse.getWarehouseStorage().get(aClass).poll();
+                if (resource != null) {
+                    retrievedLifestock.offer(resource);
+                }
+            }
+
         });
 
-        retrievedLifestock.forEach(resource -> {
-            warehouse.removeResourceFromWarehouse(resource);
-        });
+        retrievedLifestock.stream()
+                .filter(Objects::nonNull)
+                .map(Lifestock.class::cast)
+                .forEachOrdered(lifestock -> {
+                    if (lifestock.isReadyForSlaughter()) {
+                        lifestockToSlaughter.add(retrievedLifestock.poll());
+                    } else {
+                        lifestockToReturn.add(retrievedLifestock.poll());
+                    }
+                });
 
-        return retrievedLifestock;
+        warehouse.addResourceToWarehouse(lifestockToReturn);
+        return lifestockToSlaughter;
 
     }
 

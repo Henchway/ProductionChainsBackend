@@ -57,7 +57,7 @@ public class TimelineRestServiceController {
 
     @GetMapping("/statistics")
     public Statistics retrieveStatistics() {
-
+        statistics.refreshStatistics();
         return statistics;
 
     }

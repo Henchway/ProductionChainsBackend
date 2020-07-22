@@ -53,7 +53,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquireChickenLifestock() {
         List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(5) + 5) * efficiency;
+        int lifestock = (Generator.nextInt(5) + 10) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Chicken());
         }
@@ -63,7 +63,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquireCowLifestock() {
         List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 1) * efficiency;
+        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Cow());
         }
@@ -73,7 +73,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquirePigLifestock() {
         List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
+        int lifestock = (Generator.nextInt(2) + 4) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Pig());
         }
@@ -83,7 +83,7 @@ public class Farmer extends Labour {
 
     public List<Resource> acquireSheepLifestock() {
         List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
+        int lifestock = (Generator.nextInt(2) + 4) * efficiency;
         for (int i = 0; i < lifestock; i++) {
             list.add(new Sheep());
         }
