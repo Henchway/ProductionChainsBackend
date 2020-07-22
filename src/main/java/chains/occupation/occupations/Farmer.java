@@ -6,20 +6,21 @@ import chains.materials.lifestock.Chicken;
 import chains.materials.lifestock.Cow;
 import chains.materials.lifestock.Pig;
 import chains.materials.lifestock.Sheep;
-import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Farmer extends Labour {
 
-    private static double weight = 20.0;
+    private static double weight = 60.0;
 
     public Farmer(Worker worker) {
-
         this.worker = worker;
         this.warehouse = worker.getGameTimeline().getWarehouse();
     }
@@ -47,8 +48,8 @@ public class Farmer extends Labour {
                 }
         );
 
-        store(readyForSlaughterLifestock);
-        store(acquireSheepLifestock());
+        storeDifferentTypes(readyForSlaughterLifestock);
+        storeSameTypes(acquireSheepLifestock());
     }
 
     public List<Resource> acquireChickenLifestock() {

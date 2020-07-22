@@ -9,7 +9,6 @@ import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Tanner extends Craft {
@@ -25,7 +24,7 @@ public class Tanner extends Craft {
     public void produce() {
 
         retrieveResourcesforLeather();
-        store(produceLeather());
+        storeSameTypes(produceLeather());
 
     }
 
@@ -45,8 +44,8 @@ public class Tanner extends Craft {
          * Efficiency raises the amount of leather retrieved and produced at once
          */
 
-        for (int i = 0; i < localResourceStorage.getOrDefault(Tannin.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size(); i = i + efficiency) {
-            for (int j = 0; j < localResourceStorage.getOrDefault(Hide.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size(); j = j + 5 * efficiency) {
+        for (int i = 0; i < localResourceStorage.getOrDefault(Tannin.class, Generator.createConcurrentLinkedQueue(Resource.class)).size(); i = i + efficiency) {
+            for (int j = 0; j < localResourceStorage.getOrDefault(Hide.class, Generator.createConcurrentLinkedQueue(Resource.class)).size(); j = j + 5 * efficiency) {
                 retrieveResourceFromLocalStorage(Tannin.class, (long) efficiency);
                 retrieveResourceFromLocalStorage(Hide.class, 5L * efficiency);
                 for (int k = 0; k < 5 * efficiency; k++) {

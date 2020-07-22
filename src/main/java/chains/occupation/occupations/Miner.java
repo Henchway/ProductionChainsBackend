@@ -1,15 +1,12 @@
 package chains.occupation.occupations;
 
 import chains.materials.Resource;
-import chains.materials.intermediate.Iron;
 import chains.materials.raw.Coal;
 import chains.materials.raw.IronOre;
-import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -24,8 +21,8 @@ public class Miner extends Labour {
 
     @Override
     public void produce() {
-        store(produceCoal());
-        store(produceIronOre());
+        storeSameTypes(produceCoal());
+        storeSameTypes(produceIronOre());
     }
 
     public List<Resource> produceCoal() {

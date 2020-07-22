@@ -3,15 +3,12 @@ package chains.occupation.occupations;
 import chains.materials.Resource;
 import chains.materials.raw.Tannin;
 import chains.materials.raw.Wood;
-import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 public class Lumberjack extends Labour {
     private static double weight = 10.0;
@@ -25,8 +22,8 @@ public class Lumberjack extends Labour {
     @Override
     public void produce() {
         List<Resource> lumber = produceLumber();
-        store(lumber);
-        store(produceTannin(lumber.size()));
+        storeSameTypes(lumber);
+        storeSameTypes(produceTannin(lumber.size()));
     }
 
     public List<Resource> produceLumber() {

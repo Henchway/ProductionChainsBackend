@@ -23,6 +23,7 @@ public class Statistics {
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
     TreeMap<String, Integer> resources;
+    private long locallyStoredResources;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -49,6 +50,24 @@ public class Statistics {
                 .filter(Objects::nonNull)
                 .filter(Worker::isMigrated)
                 .count();
+
+//        List<ConcurrentLinkedQueue<Resource>> list = workersStatisticsList.stream()
+//                .filter(Objects::nonNull)
+//                .filter(Worker::hasWork)
+//                .map(worker -> worker.getWork().getLocalResourceStorage().values())
+//                .flatMap(Collection::stream)
+//                .count();
+
+        locallyStoredResources = workersStatisticsList.stream()
+                .filter(Objects::nonNull)
+                .filter(Worker::hasWork)
+                .map(worker -> worker.getWork().getLocalResourceStorage().values())
+                .mapToLong(Collection::size)
+                .sum();
+
+
+
+//        System.out.println(Collections.max(list));
 
         maleWorkersCount = workersCount - femaleWorkersCount;
         generateWorkMap();
@@ -119,6 +138,9 @@ public class Statistics {
         return currentYear;
     }
 
+    public long getLocallyStoredResources() {
+        return locallyStoredResources;
+    }
 
     public TreeMap<String, Integer> getWorkMap() {
         return workMap;

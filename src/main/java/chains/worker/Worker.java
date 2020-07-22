@@ -325,7 +325,7 @@ public class Worker {
         return name;
     }
 
-    public boolean isHasWork() {
+    public boolean hasWork() {
         return hasWork;
     }
 

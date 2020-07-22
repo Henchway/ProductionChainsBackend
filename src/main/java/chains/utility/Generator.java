@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Generator {
@@ -180,8 +181,8 @@ public class Generator {
 
     }
 
-    public static <T> CopyOnWriteArrayList<T> createEmptyCopyOnWriteList(Class<T> clazz) {
-        return new CopyOnWriteArrayList<>();
+    public static <T> ConcurrentLinkedQueue<T> createConcurrentLinkedQueue(Class<T> clazz) {
+        return new ConcurrentLinkedQueue<>();
     }
 
 

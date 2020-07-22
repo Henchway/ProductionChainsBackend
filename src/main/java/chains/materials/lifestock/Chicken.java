@@ -3,8 +3,10 @@ package chains.materials.lifestock;
 import chains.materials.Lifestock;
 import chains.utility.Generator;
 
+import javax.persistence.Entity;
 import java.util.Random;
 
+@Entity
 public class Chicken extends Lifestock {
 
     public Chicken() {

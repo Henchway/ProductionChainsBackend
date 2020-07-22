@@ -9,7 +9,9 @@ import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Shepherd extends Labour {
@@ -23,24 +25,21 @@ public class Shepherd extends Labour {
 
     @Override
     public void produce() {
-        retrieveLifestock();
-        store(produceWool());
-        store(produceMeat());
+        ageLocallyHeldLifestock();
+        addResourceToLocalStorage(retrieveLifestock());
+        storeSameTypes(produceWool());
+        storeSameTypes(produceMeat());
     }
 
-    public void retrieveLifestock() {
-
-        Random random = new Random();
-        if (localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size() < 50) {
-            addResourceToLocalStorage(warehouse.retrieveResourceAmountFromWarehouse(Sheep.class, random.nextInt(5) + 5L * efficiency));
-        }
+    public List<Resource> retrieveLifestock() {
+        return warehouse.retrieveResourceAmountFromWarehouse(Sheep.class, Generator.nextInt(5) + 5L * efficiency);
     }
 
     public List<Resource> produceMeat() {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class)).size())
+        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Resource.class)).size())
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)
@@ -61,7 +60,7 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Generator.createEmptyCopyOnWriteList(Resource.class))
+        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Resource.class))
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)

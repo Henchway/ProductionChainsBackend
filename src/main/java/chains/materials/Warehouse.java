@@ -2,6 +2,7 @@ package chains.materials;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -9,21 +10,42 @@ import java.util.stream.Collectors;
 public class Warehouse {
 
     private final ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> warehouseStorage = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<Resource> resourcesToBeRemoved = new ConcurrentLinkedQueue<>();
 
-    public void addResourceToWarehouse(List<Resource> list) {
+
+    public void addResourcesOfSameTypeToWarehouse(List<Resource> list) {
 
         if (!list.isEmpty()) {
             Class<? extends Resource> aClass = list.get(0).getClass();
+
             if (warehouseStorage.containsKey(aClass)) {
                 warehouseStorage.get(aClass).addAll(list);
             } else {
                 // Else simply add the received resource
-                ConcurrentLinkedQueue<Resource> newList = new ConcurrentLinkedQueue<>(list);
-                warehouseStorage.put(aClass, newList);
+                ConcurrentLinkedQueue<Resource> newResourceQueue = new ConcurrentLinkedQueue<>(list);
+                warehouseStorage.put(aClass, newResourceQueue);
             }
         }
 
+    }
+
+
+    public void addResourcesOfDifferentTypeToWarehouse(List<Resource> list) {
+
+        list.stream()
+                .filter(Objects::nonNull)
+                .forEach(resource -> {
+                    Class<? extends Resource> aClass = resource.getClass();
+
+                    if (warehouseStorage.containsKey(aClass)) {
+                        warehouseStorage.get(aClass).offer(resource);
+                    } else {
+                        // Else simply add the received resource
+                        ConcurrentLinkedQueue<Resource> newResourceQueue = new ConcurrentLinkedQueue<>();
+                        newResourceQueue.offer(resource);
+                        warehouseStorage.put(aClass, newResourceQueue);
+                    }
+
+                });
     }
 
     public <T extends Resource> List<Resource> retrieveResourceAmountFromWarehouse(Class<T> requestedResource, Long amount) {
@@ -40,6 +62,21 @@ public class Warehouse {
         return retrievedResources;
     }
 
+    public <T extends Lifestock> List<Resource> retrieveReadyForSlaughterLifestock(Class<T> requestedResource, Long amount) {
+
+        List<Resource> list = warehouseStorage.get(requestedResource)
+                .stream()
+                .sequential()
+                .map(Lifestock.class::cast)
+                .filter(Lifestock::isReadyForSlaughter)
+                .limit(amount)
+                .collect(Collectors.toList());
+
+        removeResourcesFromWarehouse(list);
+        return list;
+    }
+
+
     public boolean retrieveFoodFromWarehouse(int amount) {
 
         List<Resource> retrievedResources = new ArrayList<>();
@@ -53,19 +90,16 @@ public class Warehouse {
     }
 
     public void removeResourceFromWarehouse(Resource resource) {
+
         warehouseStorage.get(resource.getClass()).remove(resource);
     }
 
-    public void bulkRemoveResourceFromWarehouse() {
-
-        while (!resourcesToBeRemoved.isEmpty()) {
-            Resource resource = resourcesToBeRemoved.poll();
-            warehouseStorage.get(resource.getClass()).remove(resource);
+    public void removeResourcesFromWarehouse(List<Resource> list) {
+        if (!list.isEmpty()) {
+            warehouseStorage.get(list.get(0).getClass()).removeAll(list);
         }
+//        list.forEach(this::removeResourceFromWarehouse);
 
-//        resourcesToBeRemoved.forEach(
-//                resource -> warehouseStorage.get(resource.getClass()).removeAll(resource)
-//        );
     }
 
 
@@ -81,9 +115,5 @@ public class Warehouse {
 
     public ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> getWarehouseStorage() {
         return warehouseStorage;
-    }
-
-    public ConcurrentLinkedQueue<Resource> getResourcesToBeRemoved() {
-        return resourcesToBeRemoved;
     }
 }

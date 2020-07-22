@@ -3,15 +3,12 @@ package chains.occupation.occupations;
 import chains.materials.Resource;
 import chains.materials.raw.Hide;
 import chains.materials.raw.Meat;
-import chains.occupation.Work;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 public class Hunter extends Labour {
     private static double weight = 15.0;
@@ -24,8 +21,8 @@ public class Hunter extends Labour {
     @Override
     public void produce() {
         List<Resource> list = produceHide();
-        store(produceMeat(list.size()));
-        store(list);
+        storeSameTypes(produceMeat(list.size()));
+        storeSameTypes(list);
     }
 
     public List<Resource> produceHide() {

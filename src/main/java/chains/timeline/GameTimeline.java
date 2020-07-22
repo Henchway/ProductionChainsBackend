@@ -65,27 +65,35 @@ public class GameTimeline {
             milk.add(new Milk());
         }
 
-        warehouse.addResourceToWarehouse(meat);
-        warehouse.addResourceToWarehouse(milk);
+        warehouse.addResourcesOfDifferentTypeToWarehouse(meat);
+        warehouse.addResourcesOfDifferentTypeToWarehouse(milk);
 
     }
 
     public void ageLifestock() {
-        List<Class<? extends Resource>> list = getWarehouse().getWarehouseStorage()
-                .keySet()
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(Lifestock.class::isAssignableFrom)
-                .collect(Collectors.toList());
 
-        list.forEach(aClass -> {
-            getWarehouse().getWarehouseStorage().get(aClass)
+        List<Class<Lifestock>> lifestock = warehouse.getSpecificTypeOfResource(Lifestock.class);
+
+        lifestock.forEach(lifestockClass -> {
+            List<Lifestock> list = warehouse.getWarehouseStorage()
+                    .get(lifestockClass)
                     .stream()
                     .filter(Objects::nonNull)
                     .map(Lifestock.class::cast)
-                    .forEach(lifestock -> lifestock.age(this));
+                    .collect(Collectors.toList());
+
+            list.forEach(Lifestock::age);
+
+            List<Resource> deadLifestock = list.stream()
+                    .filter(Objects::nonNull)
+                    .filter(lifestock1 -> !lifestock1.isAlive())
+                    .map(Resource.class::cast)
+                    .collect(Collectors.toList());
+
+            warehouse.removeResourcesFromWarehouse(deadLifestock);
+
         });
-        warehouse.bulkRemoveResourceFromWarehouse();
+
     }
 
 
