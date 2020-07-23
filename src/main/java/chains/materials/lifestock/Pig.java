@@ -3,9 +3,7 @@ package chains.materials.lifestock;
 import chains.materials.Lifestock;
 import chains.utility.Generator;
 
-import javax.persistence.Entity;
 
-@Entity
 public class Pig extends Lifestock {
 
     public Pig() {

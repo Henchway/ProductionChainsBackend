@@ -1,7 +1,5 @@
 package chains.occupation.occupations;
 
-import chains.Main;
-import chains.db.LifestockDbController;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.raw.Meat;
@@ -9,7 +7,6 @@ import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +33,7 @@ public class Butcher extends Craft {
         lifestockList.forEach(lifestockClass -> {
             addResourceToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
         });
+
 //
 //
 //        ConcurrentLinkedQueue<Resource> retrievedLifestock = new ConcurrentLinkedQueue<>();

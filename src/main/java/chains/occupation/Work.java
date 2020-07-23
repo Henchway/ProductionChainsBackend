@@ -1,13 +1,10 @@
 package chains.occupation;
 
-import chains.db.LifestockDbController;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Tool;
 import chains.materials.Warehouse;
 import chains.worker.Worker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;

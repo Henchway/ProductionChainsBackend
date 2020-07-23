@@ -1,20 +1,8 @@
 package chains.materials;
 
-import chains.Main;
-import chains.db.LifestockDbController;
-import chains.timeline.GameTimeline;
-import com.fasterxml.jackson.databind.util.BeanUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.persistence.*;
-
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Lifestock implements Resource {
 
-    @Id
-    @GeneratedValue
+
     protected long id;
     protected int lifeExpectancy;
     protected int age;
