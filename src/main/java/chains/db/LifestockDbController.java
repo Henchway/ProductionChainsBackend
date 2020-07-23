@@ -21,18 +21,28 @@ public class LifestockDbController {
         lifestockRepository.save(lifestock);
     }
 
+    public void saveToDb(List<Lifestock> lifestock) {
+        lifestockRepository.saveAll(lifestock);
+    }
+
     public <T> List<Lifestock> retrieveLifestockByType(Class<T> requestedResource, int amount) {
         return lifestockRepository.findLifestocksByClazz(requestedResource, PageRequest.of(0, amount));
     }
 
     public <T> List<Lifestock> retrieveLifestockReadyForSlaughterByType(Class<T> requestedResource, boolean readyForSlaughter, int amount) {
-        return lifestockRepository.findLifestocksByReadyForSlaughterAndClazz(readyForSlaughter, requestedResource, PageRequest.of(0, amount));
+        return lifestockRepository.removeLifestocksByReadyForSlaughterAndClazz(readyForSlaughter, requestedResource, PageRequest.of(0, amount));
+    }
+
+    public List<Lifestock> getAllLifestock() {
+        return lifestockRepository.findAll();
+    }
+
+    public void removeFromDb(List<Lifestock> list) {
+        lifestockRepository.deleteAll(list);
     }
 
 
-    public void saveListToDb(List<Lifestock> lifestock) {
-        lifestockRepository.saveAll(lifestock);
-    }
+
 
 
 }

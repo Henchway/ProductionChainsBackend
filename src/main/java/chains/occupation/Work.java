@@ -134,7 +134,8 @@ public abstract class Work {
 
             list.forEach(Lifestock::age);
 
-            List<Resource> deadLifestock = list.stream()
+            List<Resource> deadLifestock = list
+                    .stream()
                     .filter(Objects::nonNull)
                     .filter(lifestock1 -> !lifestock1.isAlive())
                     .map(Resource.class::cast)

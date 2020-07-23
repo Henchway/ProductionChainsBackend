@@ -2,6 +2,10 @@ package chains.occupation.occupations;
 
 import chains.materials.Lifestock;
 import chains.materials.Resource;
+import chains.materials.lifestock.Chicken;
+import chains.materials.lifestock.Cow;
+import chains.materials.lifestock.Pig;
+import chains.materials.lifestock.Sheep;
 import chains.materials.raw.Meat;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
@@ -11,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @Scope("prototype")
 public class Butcher extends Craft {
@@ -25,17 +31,26 @@ public class Butcher extends Craft {
     @Override
     public void produce() {
 
-        retrieveReadyForSlaughterLifestockFromWarehouse();
+        addResourceToLocalStorage(retrieveReadyForSlaughterLifestockFromWarehouse());
         storeSameTypes(produceMeat());
 
     }
 
-    public void retrieveReadyForSlaughterLifestockFromWarehouse() {
+    public List<Resource> retrieveReadyForSlaughterLifestockFromWarehouse() {
+        List<Lifestock> retrievedResources = new ArrayList<>();
+        retrievedResources.addAll(lifestockDbController.retrieveLifestockReadyForSlaughterByType(Sheep.class, true, 10 * efficiency));
+        retrievedResources.addAll(lifestockDbController.retrieveLifestockReadyForSlaughterByType(Cow.class, true, 8 * efficiency));
+        retrievedResources.addAll(lifestockDbController.retrieveLifestockReadyForSlaughterByType(Chicken.class, true, 30 * efficiency));
+        retrievedResources.addAll(lifestockDbController.retrieveLifestockReadyForSlaughterByType(Pig.class, true, 15 * efficiency));
+        return retrievedResources
+                .stream()
+                .map(Resource.class::cast)
+                .collect(Collectors.toList());
 
-        List<Class<Lifestock>> lifestockList = warehouse.getSpecificTypeOfResource(Lifestock.class);
-        lifestockList.forEach(lifestockClass -> {
-            addResourceToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
-        });
+//        List<Class<Lifestock>> lifestockList = warehouse.getSpecificTypeOfResource(Lifestock.class);
+//        lifestockList.forEach(lifestockClass -> {
+//            addResourceToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
+//        });
 //
 //
 //        ConcurrentLinkedQueue<Resource> retrievedLifestock = new ConcurrentLinkedQueue<>();

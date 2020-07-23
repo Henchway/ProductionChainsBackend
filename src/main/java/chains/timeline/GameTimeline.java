@@ -1,5 +1,6 @@
 package chains.timeline;
 
+import chains.db.LifestockDbController;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Warehouse;
@@ -8,8 +9,11 @@ import chains.materials.raw.Milk;
 import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -22,6 +26,7 @@ public class GameTimeline {
     private Statistics statistics;
     private int population = 1000;
     private Warehouse warehouse;
+    LifestockDbController lifestockDbController;
 
 
     public GameTimeline(Warehouse warehouse) {
@@ -33,7 +38,7 @@ public class GameTimeline {
 
         long start = System.nanoTime();
 
-        workersList.parallelStream()
+        workersList.stream()
                 .filter(Worker::isAlive)
                 .forEach(Worker::lifecycle);
 
@@ -72,27 +77,35 @@ public class GameTimeline {
 
     public void ageLifestock() {
 
-        List<Class<Lifestock>> lifestock = warehouse.getSpecificTypeOfResource(Lifestock.class);
 
-        lifestock.forEach(lifestockClass -> {
-            List<Lifestock> list = warehouse.getWarehouseStorage()
-                    .get(lifestockClass)
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(Lifestock.class::cast)
-                    .collect(Collectors.toList());
+        List<Lifestock> allLifestock = lifestockDbController.getAllLifestock();
+        allLifestock.forEach(Lifestock::age);
+        List<Lifestock> deadLifestock = allLifestock.stream()
+                .filter(lifestock1 -> !lifestock1.isAlive())
+                .collect(Collectors.toList());
+        lifestockDbController.saveToDb(allLifestock);
+        lifestockDbController.removeFromDb(deadLifestock);
 
-            list.forEach(Lifestock::age);
+//        List<Class<Lifestock>> lifestock = warehouse.getSpecificTypeOfResource(Lifestock.class);
+//        lifestock.forEach(lifestockClass -> {
+//            List<Lifestock> list = warehouse.getWarehouseStorage()
+//                    .get(lifestockClass)
+//                    .stream()
+//                    .filter(Objects::nonNull)
+//                    .map(Lifestock.class::cast)
+//                    .collect(Collectors.toList());
+//
+//            list.forEach(Lifestock::age);
+//
+//            List<Resource> deadLifestock = list.stream()
+//                    .filter(Objects::nonNull)
+//                    .filter(lifestock1 -> !lifestock1.isAlive())
+//                    .map(Resource.class::cast)
+//                    .collect(Collectors.toList());
+//
+//            warehouse.removeResourcesFromWarehouse(deadLifestock);
 
-            List<Resource> deadLifestock = list.stream()
-                    .filter(Objects::nonNull)
-                    .filter(lifestock1 -> !lifestock1.isAlive())
-                    .map(Resource.class::cast)
-                    .collect(Collectors.toList());
-
-            warehouse.removeResourcesFromWarehouse(deadLifestock);
-
-        });
+//        });
 
     }
 
@@ -159,5 +172,9 @@ public class GameTimeline {
         this.warehouse = warehouse;
     }
 
+    @Autowired
+    public void setLifestockDbController(LifestockDbController lifestockDbController) {
+        this.lifestockDbController = lifestockDbController;
+    }
 
 }

@@ -51,9 +51,8 @@ public class Farmer extends Labour {
                 }
         );
 
-        lifestockDbController.saveListToDb(readyForSlaughterLifestock);
-        lifestockDbController.saveListToDb(acquireSheepLifestock());
-
+        lifestockDbController.saveToDb(readyForSlaughterLifestock);
+        lifestockDbController.saveToDb(acquireSheepLifestock());
 
     }
 
