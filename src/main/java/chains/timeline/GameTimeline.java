@@ -11,10 +11,8 @@ import chains.worker.Worker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 
 public class GameTimeline {
@@ -74,28 +72,39 @@ public class GameTimeline {
 
     public void ageLifestock() {
 
-        List<Class<Lifestock>> lifestock = warehouse.getSpecificTypeOfResource(Lifestock.class);
 
-        lifestock.forEach(lifestockClass -> {
-            List<Lifestock> list = warehouse.getWarehouseStorage()
-                    .get(lifestockClass)
-                    .parallelStream()
-                    .filter(Objects::nonNull)
-                    .map(Lifestock.class::cast)
-                    .collect(Collectors.toList());
+        List<Lifestock> deadLifestock = new ArrayList<>();
 
-            list.forEach(Lifestock::age);
-
-            List<Resource> deadLifestock = list
-                    .parallelStream()
-                    .filter(Objects::nonNull)
-                    .filter(lifestock1 -> !lifestock1.isAlive())
-                    .map(Resource.class::cast)
-                    .collect(Collectors.toList());
-
-            warehouse.removeResourcesFromWarehouse(deadLifestock);
-
+        warehouse.getLifestockStorage().values().forEach(lifestocks -> {
+            lifestocks.forEach(
+                    lifestock1 -> {
+                        lifestock1.age();
+                        if (!lifestock1.isAlive()) {
+                            deadLifestock.add(lifestock1);
+                        }
+                    });
         });
+
+        warehouse.removeLifestockFromLifestockStorage(deadLifestock);
+
+//        List<Class<Lifestock>> lifestock = warehouse.getTypesOfLifestock(Lifestock.class);
+//        lifestock.forEach(lifestockClass -> {
+//            List<Lifestock> list = warehouse.getLifestockStorage()
+//                    .get(lifestockClass)
+//                    .parallelStream()
+//                    .filter(Objects::nonNull)
+//                    .collect(Collectors.toList());
+//
+//            List<Resource> deadLifestock = list
+//                    .parallelStream()
+//                    .filter(Objects::nonNull)
+//                    .filter(lifestock1 -> !lifestock1.isAlive())
+//                    .map(Resource.class::cast)
+//                    .collect(Collectors.toList());
+//
+//            warehouse.removeResourcesFromWarehouse(deadLifestock);
+//
+//        });
 
     }
 

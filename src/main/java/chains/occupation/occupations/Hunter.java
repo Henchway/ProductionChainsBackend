@@ -21,8 +21,8 @@ public class Hunter extends Labour {
     @Override
     public void produce() {
         List<Resource> list = produceHide();
-        storeSameTypes(produceMeat(list.size()));
-        storeSameTypes(list);
+        warehouse.addResourcesOfSameTypeToWarehouse(produceMeat(list.size()));
+        warehouse.addResourcesOfSameTypeToWarehouse(list);
     }
 
     public List<Resource> produceHide() {

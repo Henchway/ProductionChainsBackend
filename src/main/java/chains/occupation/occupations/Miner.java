@@ -21,8 +21,8 @@ public class Miner extends Labour {
 
     @Override
     public void produce() {
-        storeSameTypes(produceCoal());
-        storeSameTypes(produceIronOre());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceCoal());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceIronOre());
     }
 
     public List<Resource> produceCoal() {

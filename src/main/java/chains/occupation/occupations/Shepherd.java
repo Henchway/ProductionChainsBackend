@@ -26,23 +26,22 @@ public class Shepherd extends Labour {
     @Override
     public void produce() {
         ageLocallyHeldLifestock();
-        addResourceToLocalStorage(retrieveLifestock());
-        storeSameTypes(produceWool());
-        storeSameTypes(produceMeat());
+        addLifestockToLocalStorage(retrieveLifestock());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceWool());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceMeat());
     }
 
-    public List<Resource> retrieveLifestock() {
-        return warehouse.retrieveResourceAmountFromWarehouse(Sheep.class, Generator.nextInt(5) + 5L * efficiency);
+    public List<Lifestock> retrieveLifestock() {
+        return warehouse.retrieveLifestockAmountFromWarehouse(Sheep.class, Generator.nextInt(5) + 5L * efficiency);
     }
 
     public List<Resource> produceMeat() {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = retrieveResourceFromLocalStorage(Sheep.class, (long) localResourceStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Resource.class)).size())
+        List<Lifestock> sheepList = retrieveLifestockFromLocalStorage(Sheep.class, (long) localLifestockStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Lifestock.class)).size())
                 .stream()
                 .filter(Objects::nonNull)
-                .map(Sheep.class::cast)
                 .filter(Lifestock::isReadyForSlaughter)
                 .collect(Collectors.toList());
 
@@ -60,7 +59,7 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = localResourceStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Resource.class))
+        List<Sheep> sheepList = localLifestockStorage.getOrDefault(Sheep.class, Generator.createConcurrentLinkedQueue(Lifestock.class))
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)

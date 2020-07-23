@@ -1,7 +1,6 @@
 package chains.occupation.occupations;
 
 import chains.materials.Lifestock;
-import chains.materials.Resource;
 import chains.materials.lifestock.Chicken;
 import chains.materials.lifestock.Cow;
 import chains.materials.lifestock.Pig;
@@ -29,18 +28,13 @@ public class Farmer extends Labour {
     public void produce() {
 
         ageLocallyHeldLifestock();
-        addResourceToLocalStorage(acquireCowLifestock());
-        addResourceToLocalStorage(acquireChickenLifestock());
-        addResourceToLocalStorage(acquirePigLifestock());
+        addLifestockToLocalStorage(acquireLifestockExceptSheep());
 
-        List<Resource> readyForSlaughterLifestock = localResourceStorage.values()
+        List<Lifestock> readyForSlaughterLifestock = localLifestockStorage.values()
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
-                .filter(resource -> Lifestock.class.isAssignableFrom(resource.getClass()))
-                .map(Lifestock.class::cast)
                 .filter(Lifestock::isReadyForSlaughter)
-                .map(Resource.class::cast)
                 .collect(Collectors.toList());
 
         readyForSlaughterLifestock.forEach(lifestock1 -> {
@@ -48,48 +42,34 @@ public class Farmer extends Labour {
                 }
         );
 
-        storeDifferentTypes(readyForSlaughterLifestock);
-        storeSameTypes(acquireSheepLifestock());
+        warehouse.addLifestockOfDifferentTypeToWarehouse(readyForSlaughterLifestock);
+        warehouse.addLifestockOfSameTypeToWarehouse(acquireSheepLifestock());
     }
 
-    public List<Resource> acquireChickenLifestock() {
-        List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(5) + 10) * efficiency;
-        for (int i = 0; i < lifestock; i++) {
+    public List<Lifestock> acquireLifestockExceptSheep() {
+        List<Lifestock> list = new ArrayList<>();
+
+        for (int i = 0; i < (Generator.nextInt(5) + 10) * efficiency; i++) {
             list.add(new Chicken());
         }
-        return list;
 
-    }
-
-    public List<Resource> acquireCowLifestock() {
-        List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 2) * efficiency;
-        for (int i = 0; i < lifestock; i++) {
+        for (int i = 0; i < (Generator.nextInt(2) + 2) * efficiency; i++) {
             list.add(new Cow());
         }
-        return list;
 
-    }
-
-    public List<Resource> acquirePigLifestock() {
-        List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 4) * efficiency;
-        for (int i = 0; i < lifestock; i++) {
+        for (int i = 0; i < (Generator.nextInt(2) + 4) * efficiency; i++) {
             list.add(new Pig());
         }
-        return list;
 
+        return list;
     }
 
-    public List<Resource> acquireSheepLifestock() {
-        List<Resource> list = new ArrayList<>();
-        int lifestock = (Generator.nextInt(2) + 4) * efficiency;
-        for (int i = 0; i < lifestock; i++) {
+    public List<Lifestock> acquireSheepLifestock() {
+        List<Lifestock> list = new ArrayList<>();
+        for (int i = 0; i < (Generator.nextInt(2) + 4) * efficiency; i++) {
             list.add(new Sheep());
         }
         return list;
-
     }
 
 

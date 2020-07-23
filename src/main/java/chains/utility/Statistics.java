@@ -106,7 +106,7 @@ public class Statistics {
 
     public void getWarehouseResources() {
 
-        ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resources = new ConcurrentHashMap<>(this.warehouse.getWarehouseStorage());
+        ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resources = new ConcurrentHashMap<>(this.warehouse.getResourceStorage());
 
         this.resources = new TreeMap<>();
         resources

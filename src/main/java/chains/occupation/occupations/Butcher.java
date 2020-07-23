@@ -23,15 +23,15 @@ public class Butcher extends Craft {
     public void produce() {
 
         retrieveReadyForSlaughterLifestockFromWarehouse();
-        storeSameTypes(produceMeat());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceMeat());
 
     }
 
     public void retrieveReadyForSlaughterLifestockFromWarehouse() {
 
-        List<Class<Lifestock>> lifestockList = warehouse.getSpecificTypeOfResource(Lifestock.class);
+        List<Class<Lifestock>> lifestockList = warehouse.getTypesOfLifestock(Lifestock.class);
         lifestockList.forEach(lifestockClass -> {
-            addResourceToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
+            addLifestockToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
         });
 
 //

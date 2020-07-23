@@ -224,7 +224,7 @@ public class Worker {
     public void eat() {
 
         int requiredEnergy = isAdult ? 50 : (age > 9 ? 20 : 10);
-        boolean starvationImminent = gameTimeline.getWarehouse().retrieveFoodFromWarehouse(requiredEnergy);
+        boolean starvationImminent = gameTimeline.getWarehouse().removeFoodFromWarehouse(requiredEnergy);
         if (starvationImminent && starving) {
             die("Starvation");
         }

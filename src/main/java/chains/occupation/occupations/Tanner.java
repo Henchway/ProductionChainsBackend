@@ -24,10 +24,9 @@ public class Tanner extends Craft {
     public void produce() {
 
         retrieveResourcesforLeather();
-        storeSameTypes(produceLeather());
+        warehouse.addResourcesOfSameTypeToWarehouse(produceLeather());
 
     }
-
 
     public void retrieveResourcesforLeather() {
         addResourceToLocalStorage(warehouse.retrieveResourceAmountFromWarehouse(Tannin.class, 2L * efficiency));

@@ -8,6 +8,7 @@ import chains.worker.Worker;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public abstract class Work {
@@ -17,6 +18,7 @@ public abstract class Work {
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
     protected HashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> localResourceStorage = new HashMap<>();
+    protected HashMap<Class<? extends Lifestock>, ConcurrentLinkedQueue<Lifestock>> localLifestockStorage = new HashMap<>();
 
 
     @Override
@@ -28,14 +30,6 @@ public abstract class Work {
      *
      */
     public abstract void produce();
-
-    public void storeDifferentTypes(List<Resource> resource) {
-        warehouse.addResourcesOfDifferentTypeToWarehouse(resource);
-    }
-
-    public void storeSameTypes(List<Resource> resource) {
-        warehouse.addResourcesOfSameTypeToWarehouse(resource);
-    }
 
     public Worker getWorker() {
         return worker;
@@ -55,47 +49,30 @@ public abstract class Work {
 
     public abstract void acquireTool();
 
+
     public void addResourceToLocalStorage(List<Resource> list) {
 
-        list.stream()
-                .filter(Objects::nonNull)
-                .forEach(resource -> {
-                    Class<? extends Resource> aClass = resource.getClass();
+        ConcurrentMap<Class<? extends Resource>, List<Resource>> splitResources = list.parallelStream()
+                .collect(Collectors.groupingByConcurrent(Resource::getClass));
+        splitResources.forEach((key, value) -> {
+            localResourceStorage.computeIfAbsent(key, aClass -> new ConcurrentLinkedQueue<>()).addAll(value);
+        });
 
-                    if (localResourceStorage.containsKey(aClass)) {
-                        localResourceStorage.get(aClass).offer(resource);
-                    } else {
-                        // Else simply add the received resource
-                        ConcurrentLinkedQueue<Resource> newResourceQueue = new ConcurrentLinkedQueue<>();
-                        newResourceQueue.offer(resource);
-                        localResourceStorage.put(aClass, newResourceQueue);
-                    }
-                });
-
-//        if (!list.isEmpty()) {
-//            list.stream()
-//                    .filter(Objects::nonNull)
-//                    .forEach(resource -> {
-//
-//                        Class<? extends Resource> aClass = resource.getClass();
-//
-//                        // If the resource already exists in the warehouse, increase the number of stored pieces
-//                        if (localResourceStorage.containsKey(aClass)) {
-//                            localResourceStorage.get(aClass).add(resource);
-//                        } else {
-//                            // Else simply add the received resource & amount
-//                            CopyOnWriteArrayList<Resource> newList = new CopyOnWriteArrayList<>();
-//                            newList.add(resource);
-//                            localResourceStorage.put(aClass, newList);
-//                        }
-//
-//                    });
-//
-//        }
     }
 
-    public <T extends Resource> List<Resource> retrieveResourceFromLocalStorage(Class<T> requestedResource, Long amount) {
+    public void addLifestockToLocalStorage(List<Lifestock> list) {
 
+        ConcurrentMap<Class<? extends Lifestock>, List<Lifestock>> splitResources = list.parallelStream()
+                .collect(Collectors.groupingByConcurrent(Lifestock::getClass));
+
+        splitResources.forEach((key, value) -> {
+            localLifestockStorage.computeIfAbsent(key, aClass -> new ConcurrentLinkedQueue<>()).addAll(value);
+        });
+
+    }
+
+
+    public <T extends Resource> List<Resource> retrieveResourceFromLocalStorage(Class<T> requestedResource, Long amount) {
 
         List<Resource> retrievedResources = new ArrayList<>();
         ConcurrentLinkedQueue<Resource> itemsInMap = localResourceStorage.get(requestedResource);
@@ -106,24 +83,21 @@ public abstract class Work {
             }
         }
 
-//        List<Resource> retrievedResources = new ArrayList<>();
-//        List<Resource> itemsInMap = localResourceStorage.get(requestedResource);
-//
-//        if (localResourceStorage.containsKey(requestedResource)) {
-//            if (itemsInMap.size() < amount) {
-//                retrievedResources.addAll(itemsInMap);
-//                localResourceStorage.remove(requestedResource);
-//            } else {
-//                List<Resource> list = new ArrayList<>();
-//                for (int i = 0; i < amount; i++) {
-//                    list.add(itemsInMap.get(itemsInMap.size() - 1));
-//                    itemsInMap.remove(itemsInMap.size() - 1);
-//                }
-//                retrievedResources.addAll(list);
-//            }
-//        }
-
         return retrievedResources;
+    }
+
+    public <T extends Lifestock> List<Lifestock> retrieveLifestockFromLocalStorage(Class<T> requestedLifestock, Long amount) {
+
+        List<Lifestock> retrievedLifestock = new ArrayList<>();
+        ConcurrentLinkedQueue<Lifestock> itemsInMap = localLifestockStorage.get(requestedLifestock);
+
+        if (localLifestockStorage.containsKey(requestedLifestock)) {
+            for (int i = 0; i < amount; i++) {
+                retrievedLifestock.add(itemsInMap.poll());
+            }
+        }
+
+        return retrievedLifestock;
     }
 
 

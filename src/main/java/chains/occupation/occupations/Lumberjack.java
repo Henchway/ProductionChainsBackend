@@ -22,8 +22,8 @@ public class Lumberjack extends Labour {
     @Override
     public void produce() {
         List<Resource> lumber = produceLumber();
-        storeSameTypes(lumber);
-        storeSameTypes(produceTannin(lumber.size()));
+        warehouse.addResourcesOfSameTypeToWarehouse(lumber);
+        warehouse.addResourcesOfSameTypeToWarehouse(produceTannin(lumber.size()));
     }
 
     public List<Resource> produceLumber() {
