@@ -9,7 +9,10 @@ import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -43,9 +46,8 @@ public class GameTimeline {
         long end = System.nanoTime();
 
         long timeElapsed = end - start;
+        System.out.println("Execution time in milliseconds : " + timeElapsed / 1000000);
 
-        System.out.println("Execution time in milliseconds : " +
-                timeElapsed / 1000000);
     }
 
     public void startPopulation() {
@@ -65,8 +67,8 @@ public class GameTimeline {
             milk.add(new Milk());
         }
 
-        warehouse.addResourcesOfDifferentTypeToWarehouse(meat);
-        warehouse.addResourcesOfDifferentTypeToWarehouse(milk);
+        warehouse.addResourcesOfSameTypeToWarehouse(meat);
+        warehouse.addResourcesOfSameTypeToWarehouse(milk);
 
     }
 
@@ -77,14 +79,15 @@ public class GameTimeline {
         lifestock.forEach(lifestockClass -> {
             List<Lifestock> list = warehouse.getWarehouseStorage()
                     .get(lifestockClass)
-                    .stream()
+                    .parallelStream()
                     .filter(Objects::nonNull)
                     .map(Lifestock.class::cast)
                     .collect(Collectors.toList());
 
             list.forEach(Lifestock::age);
 
-            List<Resource> deadLifestock = list.stream()
+            List<Resource> deadLifestock = list
+                    .parallelStream()
                     .filter(Objects::nonNull)
                     .filter(lifestock1 -> !lifestock1.isAlive())
                     .map(Resource.class::cast)
