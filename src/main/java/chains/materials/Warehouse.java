@@ -1,16 +1,19 @@
 package chains.materials;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 public class Warehouse {
 
     private final ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resourceStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Class<? extends Lifestock>, ConcurrentLinkedQueue<Lifestock>> lifestockStorage = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Class<? extends Lifestock>, PriorityBlockingQueue<Lifestock>> lifestockStorage = new ConcurrentHashMap<>();
 
 
     public void addResourcesOfSameTypeToWarehouse(List<Resource> list) {
@@ -21,14 +24,15 @@ public class Warehouse {
 
     public void addLifestockOfSameTypeToWarehouse(List<Lifestock> list) {
         if (!list.isEmpty()) {
-            lifestockStorage.computeIfAbsent(list.get(0).getClass(), aClass -> new ConcurrentLinkedQueue<>()).addAll(list);
+            lifestockStorage.computeIfAbsent(list.get(0).getClass(), aClass -> new PriorityBlockingQueue<>(100, Comparator.comparingInt(Lifestock::getAge))).addAll(list);
         }
     }
 
 
     public void addResourcesOfDifferentTypeToWarehouse(List<Resource> list) {
 
-        ConcurrentMap<Class<? extends Resource>, List<Resource>> splitResources = list.parallelStream()
+        ConcurrentMap<Class<? extends Resource>, List<Resource>> splitResources = list
+                .stream()
                 .collect(Collectors.groupingByConcurrent(Resource::getClass));
 
         splitResources.forEach((key, value) -> {
@@ -39,10 +43,11 @@ public class Warehouse {
 
     public void addLifestockOfDifferentTypeToWarehouse(List<Lifestock> list) {
 
-        ConcurrentMap<Class<? extends Lifestock>, List<Lifestock>> splitResources = list.parallelStream()
+        ConcurrentMap<Class<? extends Lifestock>, List<Lifestock>> splitResources = list
+                .parallelStream()
                 .collect(Collectors.groupingByConcurrent(Lifestock::getClass));
         splitResources.forEach((key, value) -> {
-            lifestockStorage.computeIfAbsent(key, aClass -> new ConcurrentLinkedQueue<>()).addAll(value);
+            lifestockStorage.computeIfAbsent(key, aClass -> new PriorityBlockingQueue<>(100, Comparator.comparingInt(Lifestock::getAge))).addAll(value);
         });
     }
 
@@ -51,7 +56,7 @@ public class Warehouse {
         List<Resource> retrievedResources = new ArrayList<>();
         ConcurrentLinkedQueue<Resource> itemsInMap = resourceStorage.get(requestedResource);
 
-        if (resourceStorage.containsKey(requestedResource)) {
+        if (itemsInMap != null) {
             for (int i = 0; i < amount; i++) {
                 retrievedResources.add(itemsInMap.poll());
             }
@@ -63,9 +68,9 @@ public class Warehouse {
     public <T extends Lifestock> List<Lifestock> retrieveLifestockAmountFromWarehouse(Class<T> requestedLifestock, Long amount) {
 
         List<Lifestock> retrievedLifestock = new ArrayList<>();
-        ConcurrentLinkedQueue<Lifestock> itemsInMap = lifestockStorage.get(requestedLifestock);
+        PriorityBlockingQueue<Lifestock> itemsInMap = lifestockStorage.get(requestedLifestock);
 
-        if (lifestockStorage.containsKey(requestedLifestock)) {
+        if (itemsInMap != null) {
             for (int i = 0; i < amount; i++) {
                 retrievedLifestock.add(itemsInMap.poll());
             }
@@ -74,25 +79,17 @@ public class Warehouse {
         return retrievedLifestock;
     }
 
-    public <T extends Lifestock> List<Lifestock> retrieveReadyForSlaughterLifestock(Class<T> requestedResource, Long amount) {
+    public <T extends Lifestock> List<Lifestock> retrieveLifestock(Class<T> requestedResource, Long amount) {
 
-        long start = System.nanoTime();
+        List<Lifestock> list = new ArrayList<>();
+        PriorityBlockingQueue<Lifestock> queue = lifestockStorage.get(requestedResource);
 
-        List<Lifestock> list = lifestockStorage.get(requestedResource)
-                .parallelStream()
-                .unordered()
-                .filter(Lifestock::isReadyForSlaughter)
-                .limit(amount)
-                .collect(Collectors.toList());
-
-        removeLifestockFromLifestockStorage(list);
-
-        long end = System.nanoTime();
-        long timeElapsed = end - start;
-        if ((timeElapsed / 1000000) > 10) {
-            System.out.println("Execution time (lifestock ready to slaughter) in milliseconds : " +
-                    timeElapsed / 1000000);
+        if (queue != null) {
+            for (int i = 0; i < amount; i++) {
+                list.add(queue.poll());
+            }
         }
+
         return list;
     }
 
@@ -151,12 +148,11 @@ public class Warehouse {
     }
 
 
-
     public ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> getResourceStorage() {
         return resourceStorage;
     }
 
-    public ConcurrentHashMap<Class<? extends Lifestock>, ConcurrentLinkedQueue<Lifestock>> getLifestockStorage() {
+    public ConcurrentHashMap<Class<? extends Lifestock>, PriorityBlockingQueue<Lifestock>> getLifestockStorage() {
         return lifestockStorage;
     }
 }

@@ -9,6 +9,7 @@ import chains.worker.Worker;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 public abstract class Work {
@@ -18,7 +19,7 @@ public abstract class Work {
     protected Set<Tool> tools = new HashSet<>();
     protected int efficiency = 1;
     protected HashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> localResourceStorage = new HashMap<>();
-    protected HashMap<Class<? extends Lifestock>, ConcurrentLinkedQueue<Lifestock>> localLifestockStorage = new HashMap<>();
+    protected HashMap<Class<? extends Lifestock>, PriorityBlockingQueue<Lifestock>> localLifestockStorage = new HashMap<>();
 
 
     @Override
@@ -53,6 +54,7 @@ public abstract class Work {
     public void addResourceToLocalStorage(List<Resource> list) {
 
         ConcurrentMap<Class<? extends Resource>, List<Resource>> splitResources = list.parallelStream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.groupingByConcurrent(Resource::getClass));
         splitResources.forEach((key, value) -> {
             localResourceStorage.computeIfAbsent(key, aClass -> new ConcurrentLinkedQueue<>()).addAll(value);
@@ -63,10 +65,11 @@ public abstract class Work {
     public void addLifestockToLocalStorage(List<Lifestock> list) {
 
         ConcurrentMap<Class<? extends Lifestock>, List<Lifestock>> splitResources = list.parallelStream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.groupingByConcurrent(Lifestock::getClass));
 
         splitResources.forEach((key, value) -> {
-            localLifestockStorage.computeIfAbsent(key, aClass -> new ConcurrentLinkedQueue<>()).addAll(value);
+            localLifestockStorage.computeIfAbsent(key, aClass -> new PriorityBlockingQueue<>(100, Comparator.comparingInt(Lifestock::getAge))).addAll(value);
         });
 
     }
@@ -89,7 +92,7 @@ public abstract class Work {
     public <T extends Lifestock> List<Lifestock> retrieveLifestockFromLocalStorage(Class<T> requestedLifestock, Long amount) {
 
         List<Lifestock> retrievedLifestock = new ArrayList<>();
-        ConcurrentLinkedQueue<Lifestock> itemsInMap = localLifestockStorage.get(requestedLifestock);
+        PriorityBlockingQueue<Lifestock> itemsInMap = localLifestockStorage.get(requestedLifestock);
 
         if (localLifestockStorage.containsKey(requestedLifestock)) {
             for (int i = 0; i < amount; i++) {
@@ -121,27 +124,42 @@ public abstract class Work {
 
     public void ageLocallyHeldLifestock() {
 
-        List<Class<Lifestock>> lifestock = getSpecificTypeOfResource(Lifestock.class);
-        lifestock.forEach(lifestockClass -> {
+        localLifestockStorage
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(lifestocks -> lifestocks
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .forEach(lifestock -> {
+                            lifestock.age();
+                            if (!lifestock.isAlive()) {
+                                lifestocks.remove(lifestock);
+                            }
 
-            List<Lifestock> list = localResourceStorage
-                    .get(lifestockClass)
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(Lifestock.class::cast)
-                    .collect(Collectors.toList());
+                        }));
 
-            list.forEach(Lifestock::age);
-
-            List<Resource> deadLifestock = list.stream()
-                    .filter(Objects::nonNull)
-                    .filter(lifestock1 -> !lifestock1.isAlive())
-                    .map(Resource.class::cast)
-                    .collect(Collectors.toList());
-
-            removeResourcesFromLocalStorage(deadLifestock);
-
-        });
+//        List<Class<Lifestock>> lifestock = getSpecificTypeOfResource(Lifestock.class);
+//        lifestock.forEach(lifestockClass -> {
+//
+//            List<Lifestock> list = localResourceStorage
+//                    .get(lifestockClass)
+//                    .stream()
+//                    .filter(Objects::nonNull)
+//                    .map(Lifestock.class::cast)
+//                    .collect(Collectors.toList());
+//
+//            list.forEach(Lifestock::age);
+//
+//            List<Resource> deadLifestock = list.stream()
+//                    .filter(Objects::nonNull)
+//                    .filter(lifestock1 -> !lifestock1.isAlive())
+//                    .map(Resource.class::cast)
+//                    .collect(Collectors.toList());
+//
+//            removeResourcesFromLocalStorage(deadLifestock);
+//
+//        });
     }
 
     public void removeResourceFromLocalStorage(Resource resource) {

@@ -1,6 +1,6 @@
 package chains.materials;
 
-public abstract class Lifestock implements Resource {
+public abstract class Lifestock implements Resource, Comparable<Lifestock> {
 
 
     protected long id;
@@ -69,4 +69,15 @@ public abstract class Lifestock implements Resource {
         this.id = id;
     }
 
+    @Override
+    public int compareTo(Lifestock o) {
+
+        if (this.getAge() > o.getAge()) {
+            return 1;
+        } else if (o.getAge() > this.getAge()) {
+            return -1;
+        }
+
+        return 0;
+    }
 }

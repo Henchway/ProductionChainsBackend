@@ -1,6 +1,7 @@
 package chains.utility;
 
 import chains.materials.Food;
+import chains.materials.Lifestock;
 import chains.occupation.Work;
 import chains.occupation.occupations.*;
 import chains.worker.Worker;
@@ -20,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class Generator {
 
@@ -185,6 +187,10 @@ public class Generator {
         return new ConcurrentLinkedQueue<>();
     }
 
+    public static <T> PriorityBlockingQueue<T> createPriorityBlockingQueue(Class<T> clazz) {
+        return new PriorityBlockingQueue<>();
+    }
+
 
     public static List<String> readFileIntoList(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
@@ -201,5 +207,10 @@ public class Generator {
         return lines;
     }
 
+    public static Comparator<Lifestock> createLifestockComparator() {
+
+        return Comparator.comparingInt(Lifestock::getAge);
+
+    }
 
 }

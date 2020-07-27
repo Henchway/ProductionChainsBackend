@@ -9,6 +9,8 @@ import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
 
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,12 +42,13 @@ public class GameTimeline {
 
         ageLifestock();
         workerMigrates(workersList.size());
+        printGCStats();
+//        System.gc();
 
         long end = System.nanoTime();
 
         long timeElapsed = end - start;
         System.out.println("Execution time in milliseconds : " + timeElapsed / 1000000);
-
     }
 
     public void startPopulation() {
@@ -72,7 +75,6 @@ public class GameTimeline {
 
     public void ageLifestock() {
 
-
         List<Lifestock> deadLifestock = new ArrayList<>();
 
         warehouse.getLifestockStorage().values().forEach(lifestocks -> {
@@ -80,12 +82,10 @@ public class GameTimeline {
                     lifestock1 -> {
                         lifestock1.age();
                         if (!lifestock1.isAlive()) {
-                            deadLifestock.add(lifestock1);
+                            warehouse.removeLifestockFromLifestockStorage(lifestock1);
                         }
                     });
         });
-
-        warehouse.removeLifestockFromLifestockStorage(deadLifestock);
 
 //        List<Class<Lifestock>> lifestock = warehouse.getTypesOfLifestock(Lifestock.class);
 //        lifestock.forEach(lifestockClass -> {
@@ -106,6 +106,32 @@ public class GameTimeline {
 //
 //        });
 
+    }
+
+    public void printGCStats() {
+        long totalGarbageCollections = 0;
+        long garbageCollectionTime = 0;
+
+        for (GarbageCollectorMXBean gc :
+                ManagementFactory.getGarbageCollectorMXBeans()) {
+
+            long count = gc.getCollectionCount();
+
+            if (count >= 0) {
+                totalGarbageCollections += count;
+            }
+
+            long time = gc.getCollectionTime();
+
+            if (time >= 0) {
+                garbageCollectionTime += time;
+            }
+        }
+
+        System.out.println("Total Garbage Collections: "
+                + totalGarbageCollections);
+        System.out.println("Total Garbage Collection Time (ms): "
+                + garbageCollectionTime);
     }
 
 

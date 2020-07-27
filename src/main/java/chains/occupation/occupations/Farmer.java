@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Farmer extends Labour {
@@ -33,17 +34,19 @@ public class Farmer extends Labour {
         List<Lifestock> readyForSlaughterLifestock = localLifestockStorage.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .filter(Lifestock::isReadyForSlaughter)
+                .takeWhile(Lifestock::isReadyForSlaughter)
                 .collect(Collectors.toList());
 
         readyForSlaughterLifestock.forEach(lifestock1 -> {
-                    localResourceStorage.get(lifestock1.getClass()).remove(lifestock1);
+                    localLifestockStorage.get(lifestock1.getClass()).remove(lifestock1);
                 }
         );
 
-        warehouse.addLifestockOfDifferentTypeToWarehouse(readyForSlaughterLifestock);
         warehouse.addLifestockOfSameTypeToWarehouse(acquireSheepLifestock());
+
+        if (readyForSlaughterLifestock.size() > 0) {
+            warehouse.addLifestockOfDifferentTypeToWarehouse(readyForSlaughterLifestock);
+        }
     }
 
     public List<Lifestock> acquireLifestockExceptSheep() {

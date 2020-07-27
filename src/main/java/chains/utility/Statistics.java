@@ -1,5 +1,6 @@
 package chains.utility;
 
+import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Warehouse;
 import chains.timeline.GameTimeline;
@@ -8,6 +9,7 @@ import chains.worker.Worker;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 
@@ -23,6 +25,7 @@ public class Statistics {
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
     TreeMap<String, Integer> resources;
+    TreeMap<String, Integer> lifestock;
     private long locallyStoredResources;
 
     public Statistics(GameTimeline gameTimeline) {
@@ -33,6 +36,7 @@ public class Statistics {
     public void refreshStatistics() {
         generateWorkerStatistics();
         getWarehouseResources();
+        getWarehouseLifestock();
     }
 
 
@@ -64,7 +68,6 @@ public class Statistics {
                 .map(worker -> worker.getWork().getLocalResourceStorage().values())
                 .mapToLong(Collection::size)
                 .sum();
-
 
 
 //        System.out.println(Collections.max(list));
@@ -118,6 +121,20 @@ public class Statistics {
 
     }
 
+    public void getWarehouseLifestock() {
+
+        ConcurrentHashMap<Class<? extends Resource>, PriorityBlockingQueue<Lifestock>> lifestock = new ConcurrentHashMap<>(this.warehouse.getLifestockStorage());
+
+        this.lifestock = new TreeMap<>();
+        lifestock
+                .entrySet()
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(classListEntry -> this.lifestock.put(classListEntry.getKey().getSimpleName(),
+                        classListEntry.getValue().size()));
+
+    }
+
     public long getWorkerCount() {
         return workersCount;
     }
@@ -148,5 +165,9 @@ public class Statistics {
 
     public Map<String, Integer> getResources() {
         return resources;
+    }
+
+    public TreeMap<String, Integer> getLifestock() {
+        return lifestock;
     }
 }

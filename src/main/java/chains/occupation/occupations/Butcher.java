@@ -2,6 +2,7 @@ package chains.occupation.occupations;
 
 import chains.materials.Lifestock;
 import chains.materials.Resource;
+import chains.materials.lifestock.Sheep;
 import chains.materials.raw.Meat;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
@@ -22,16 +23,18 @@ public class Butcher extends Craft {
     @Override
     public void produce() {
 
-        retrieveReadyForSlaughterLifestockFromWarehouse();
+        retrieveLifestockFromWarehouse();
         warehouse.addResourcesOfSameTypeToWarehouse(produceMeat());
 
     }
 
-    public void retrieveReadyForSlaughterLifestockFromWarehouse() {
+    public void retrieveLifestockFromWarehouse() {
 
         List<Class<Lifestock>> lifestockList = warehouse.getTypesOfLifestock(Lifestock.class);
         lifestockList.forEach(lifestockClass -> {
-            addLifestockToLocalStorage(warehouse.retrieveReadyForSlaughterLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
+            if (lifestockClass.equals(Sheep.class)) {
+                addLifestockToLocalStorage(warehouse.retrieveLifestock(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
+            }
         });
 
 //
