@@ -3,9 +3,13 @@ package chains.worker;
 import chains.occupation.Work;
 import chains.timeline.GameTimeline;
 import chains.utility.Generator;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
+@Getter
+@Setter
 public class Worker {
 
 
@@ -223,7 +227,7 @@ public class Worker {
 
     public void eat() {
 
-        int requiredEnergy = isAdult ? 50 : (age > 9 ? 20 : 10);
+        int requiredEnergy = isAdult ? 100 : (age > 9 ? 50 : 20);
         boolean starvationImminent = gameTimeline.getWarehouse().removeFoodFromWarehouse(requiredEnergy);
         if (starvationImminent && starving) {
             die("Starvation");
@@ -244,6 +248,7 @@ public class Worker {
             partner = null;
         }
 
+        gameTimeline.addDeathToMap(reason);
         gameTimeline.removeWorkerFromList(this);
 
     }
@@ -253,43 +258,8 @@ public class Worker {
         return hasWork;
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public int getHealth() {
-        return health;
-    }
-
-    public char getGender() {
-        return gender;
-    }
-
-    public Work getWork() {
-        return work;
-    }
-
     public boolean hasPartner() {
         return partner != null;
-    }
-
-    public Worker getPartner() {
-        return partner;
-    }
-
-
-    public int getFertility() {
-        return fertility;
-    }
-
-    public void setFertility(int fertility) {
-        this.fertility = fertility;
-    }
-
-
-    public void setPartner(Worker partner) {
-        this.partner = partner;
-//        System.out.println(this + " has found a partner: " + partner);
     }
 
 
@@ -312,53 +282,5 @@ public class Worker {
                 "\t\tpartner =" + "\t\t" + partner;
     }
 
-
-    public boolean isMigrated() {
-        return migrated;
-    }
-
-    public boolean isAlive() {
-        return isAlive;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean hasWork() {
-        return hasWork;
-    }
-
-    public boolean isAdult() {
-        return isAdult;
-    }
-
-    public boolean isCriticalAge() {
-        return criticalAge;
-    }
-
-    public int getChildCounter() {
-        return childCounter;
-    }
-
-    public int getMaxChildCounter() {
-        return maxChildCounter;
-    }
-
-    public CopyOnWriteArraySet<Worker> getChildren() {
-        return children;
-    }
-
-    public CopyOnWriteArraySet<Worker> getParents() {
-        return parents;
-    }
-
-    public CopyOnWriteArraySet<Worker> getSiblings() {
-        return siblings;
-    }
-
-    public GameTimeline getGameTimeline() {
-        return gameTimeline;
-    }
 }
 

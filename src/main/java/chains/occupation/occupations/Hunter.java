@@ -12,10 +12,9 @@ import java.util.List;
 
 public class Hunter extends Labour {
     private static double weight = 30.0;
-    public Hunter(Worker worker) {
 
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+    public Hunter(Worker worker) {
+        super(worker);
     }
 
     @Override

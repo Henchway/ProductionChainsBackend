@@ -8,9 +8,9 @@ public class Blacksmith extends Craft {
 private static double weight = 0.0;
 
     public Blacksmith(Worker worker) {
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
+
 
     @Override
     public void produce() {

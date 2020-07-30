@@ -18,10 +18,9 @@ public class Shepherd extends Labour {
     private static double weight = 10.0;
 
     public Shepherd(Worker worker) {
-
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
+
 
     @Override
     public void produce() {

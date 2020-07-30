@@ -8,15 +8,19 @@ import chains.materials.raw.Milk;
 import chains.utility.Generator;
 import chains.utility.Statistics;
 import chains.worker.Worker;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
-
+@Getter
+@Setter
 public class GameTimeline {
 
     private final Set<Worker> workersList;
@@ -25,6 +29,7 @@ public class GameTimeline {
     private Statistics statistics;
     private int population = 1;
     private Warehouse warehouse;
+    private final ConcurrentHashMap<String, Integer> deathMap = new ConcurrentHashMap<>();
 
 
     public GameTimeline(Warehouse warehouse) {
@@ -41,6 +46,7 @@ public class GameTimeline {
                 .forEach(Worker::lifecycle);
 
         ageLifestock();
+        feedLifestock();
         workerMigrates(workersList.size());
 //        printGCStats();
 //        System.gc();
@@ -75,9 +81,6 @@ public class GameTimeline {
 
     public void ageLifestock() {
 
-//        List<Lifestock> deadLifestock = new ArrayList<>();
-
-
         List<ConcurrentSkipListSet<Lifestock>> list = warehouse.getLifestockStorage()
                 .values()
                 .stream()
@@ -94,6 +97,26 @@ public class GameTimeline {
         });
 
     }
+
+    public void feedLifestock() {
+        warehouse.getLifestockStorage().values().forEach(lifestocks -> {
+            lifestocks.forEach(lifestock -> {
+                for (int i = 0; i < lifestock.getFodderAmount(); i++) {
+                    try {
+                        warehouse.getResourceStorage().get(lifestock.getFodder()).remove();
+                    } catch (Exception e) {
+                        if (lifestock.getMeat() > 0) {
+                            lifestock.setMeat(lifestock.getMeat() - 1);
+                        } else {
+                            warehouse.getLifestockStorage().get(lifestock.getClass()).remove(lifestock);
+                        }
+                    }
+                }
+            });
+        });
+
+    }
+
 
     public void printGCStats() {
         long totalGarbageCollections = 0;
@@ -182,6 +205,10 @@ public class GameTimeline {
 
     public void setWarehouse(Warehouse warehouse) {
         this.warehouse = warehouse;
+    }
+
+    public void addDeathToMap(String reason) {
+        deathMap.merge(reason, 1, Integer::sum);
     }
 
 

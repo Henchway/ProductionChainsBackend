@@ -14,10 +14,9 @@ public class Lumberjack extends Labour {
     private static double weight = 10.0;
 
     public Lumberjack(Worker worker) {
-
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
+
 
     @Override
     public void produce() {

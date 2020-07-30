@@ -27,6 +27,12 @@ public abstract class Work {
     protected HashMap<Class<? extends Lifestock>, TreeSet<Lifestock>> localLifestockStorage = new HashMap<>();
 
 
+    public Work(Worker worker) {
+
+        this.worker = worker;
+        this.warehouse = worker.getGameTimeline().getWarehouse();
+    }
+
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
@@ -145,6 +151,32 @@ public abstract class Work {
         });
 
     }
+
+    /*
+   Either animals are fed or they lose Meat
+ */
+    public void feedLifestock() {
+        localLifestockStorage.values().forEach(lifestocks -> {
+            Set<Lifestock> starvedLifestock = new HashSet<>();
+            lifestocks.forEach(lifestock -> {
+                for (int i = 0; i < lifestock.getFodderAmount(); i++) {
+                    try {
+                        localResourceStorage.get(lifestock.getFodder()).remove();
+                    } catch (Exception e) {
+                        if (lifestock.getMeat() > 0) {
+                            lifestock.setMeat(lifestock.getMeat() - 1);
+                        } else {
+                            System.out.println("A " + lifestock.getClass().getSimpleName() + " starved to death.");
+                            starvedLifestock.add(lifestock);
+                        }
+                    }
+                }
+            });
+            lifestocks.removeAll(starvedLifestock);
+        });
+
+    }
+
 
     public void removeResourceFromLocalStorage(Resource resource) {
         localResourceStorage.get(resource.getClass()).remove(resource);

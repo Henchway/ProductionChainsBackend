@@ -16,8 +16,7 @@ public class Tanner extends Craft {
     protected static Double weight = 5.0;
 
     public Tanner(Worker worker) {
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
 
     @Override

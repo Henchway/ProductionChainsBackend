@@ -16,8 +16,7 @@ public class Butcher extends Craft {
     private static double weight = Farmer.getWeight() * 0.5;
 
     public Butcher(Worker worker) {
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
 
 
@@ -25,56 +24,21 @@ public class Butcher extends Craft {
     public void produce() {
 
         retrieveLifestockFromWarehouse();
-        warehouse.addResourcesOfSameTypeToWarehouse(produceMeat());
+        produceMeat();
 
     }
 
     public void retrieveLifestockFromWarehouse() {
-
         List<Class<Lifestock>> lifestockList = warehouse.getTypesOfLifestock(Lifestock.class);
         lifestockList.forEach(lifestockClass -> {
             if (!lifestockClass.equals(Sheep.class)) {
-                addLifestockToLocalStorage(warehouse.retrieveLifestockAmountFromWarehouse(lifestockClass, (long) Generator.nextInt(5) + 10 * efficiency));
+                addLifestockToLocalStorage(warehouse.retrieveLifestockAmountFromWarehouse(lifestockClass, (long) Generator.nextInt(5) + 5 * efficiency));
             }
         });
-
-//
-//
-//        ConcurrentLinkedQueue<Resource> retrievedLifestock = new ConcurrentLinkedQueue<>();
-//        List<Resource> lifestockToSlaughter = new ArrayList<>();
-//        List<Resource> lifestockToReturn = new ArrayList<>();
-//
-//        lifestockList.forEach(aClass -> {
-//
-//
-//            for (int i = 0; i < 10 + Generator.nextInt(5); i++) {
-//                Resource resource = warehouse.getWarehouseStorage().get(aClass).poll();
-//                if (resource != null) {
-//                    retrievedLifestock.offer(resource);
-//                }
-//            }
-//
-//        });
-//
-//        retrievedLifestock.stream()
-//                .filter(Objects::nonNull)
-//                .map(Lifestock.class::cast)
-//                .forEachOrdered(lifestock -> {
-//                    if (lifestock.isReadyForSlaughter()) {
-//                        lifestockToSlaughter.add(retrievedLifestock.poll());
-//                    } else {
-//                        lifestockToReturn.add(retrievedLifestock.poll());
-//                    }
-//                });
-//
-//        warehouse.addResourcesOfDifferentTypeToWarehouse(lifestockToReturn);
-//        return lifestockToSlaughter;
-
     }
 
 
-
-    public List<Resource> produceMeat() {
+    public void produceMeat() {
 
         List<Resource> meatList = new ArrayList<>();
 
@@ -88,21 +52,7 @@ public class Butcher extends Craft {
 
         });
 
-        return meatList;
-
-//        lifestock.forEach(lifestockClass -> {
-//            retrieveResourceFromLocalStorage(lifestockClass, (long) localResourceStorage
-//                    .getOrDefault(lifestockClass, Generator.createConcurrentLinkedQueue(Resource.class)).size())
-//                    .stream()
-//                    .map(Lifestock.class::cast)
-//                    .forEach(lifestock1 -> {
-//                        for (int i = 0; i < lifestock1.getMeat(); i++) {
-//                            meatList.add(new Meat());
-//                        }
-//                    });
-//        });
-
-
+        warehouse.addResourcesOfSameTypeToWarehouse(meatList);
     }
 
 

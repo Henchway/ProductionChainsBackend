@@ -1,5 +1,6 @@
 package chains.occupation.occupations;
 
+import chains.materials.Fodder;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.lifestock.Chicken;
@@ -7,16 +8,13 @@ import chains.materials.lifestock.Cow;
 import chains.materials.lifestock.Pig;
 import chains.materials.lifestock.Sheep;
 import chains.materials.raw.Grain;
+import chains.materials.raw.Hay;
 import chains.materials.raw.Milk;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Farmer extends Labour {
@@ -24,9 +22,9 @@ public class Farmer extends Labour {
     private static double weight = 60.0;
 
     public Farmer(Worker worker) {
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
+
 
     @Override
     public void produce() {
@@ -37,7 +35,9 @@ public class Farmer extends Labour {
         addReadyToSlaughterLifestockToWarehouse();
         milkCows();
         produceGrain();
-
+        produceHay();
+        feedLifestock();
+        depositFodder();
 
     }
 
@@ -104,11 +104,41 @@ public class Farmer extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        for (int i = 0; i < (10 + Generator.nextInt(10)) * efficiency; i++) {
+        for (int i = 0; i < (15 + Generator.nextInt(10)) * efficiency; i++) {
             list.add(new Grain());
         }
-        warehouse.addResourcesOfSameTypeToWarehouse(list);
+        addResourceToLocalStorage(list);
+    }
 
+    public void produceHay() {
+
+        List<Resource> list = new ArrayList<>();
+        long lifestockCount = localLifestockStorage.values()
+                .stream()
+                .mapToLong(Collection::size)
+                .sum();
+
+        for (int i = 0; i < (lifestockCount * 6 + Generator.nextInt(50)) * efficiency; i++) {
+            list.add(new Hay());
+        }
+        addResourceToLocalStorage(list);
+    }
+
+    public void depositFodder() {
+
+        localResourceStorage.forEach((aClass, resources) -> {
+
+            if (Fodder.class.isAssignableFrom(aClass)) {
+
+                List<Resource> list = resources.stream()
+                        .limit(resources.size() / 4)
+                        .collect(Collectors.toList());
+                resources.removeAll(list);
+                warehouse.addResourcesOfSameTypeToWarehouse(list);
+
+            }
+
+        });
     }
 
 

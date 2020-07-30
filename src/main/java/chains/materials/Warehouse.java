@@ -85,7 +85,7 @@ public class Warehouse {
         foodCategories.forEach(foodClass -> {
             retrievedResources.addAll(retrieveResourceAmountFromWarehouse(foodClass, (long) foodPerCategory));
         });
-        return retrievedResources.isEmpty();
+        return retrievedResources.size() == amount;
 
     }
 

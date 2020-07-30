@@ -13,6 +13,8 @@ public abstract class Lifestock implements Resource, Comparable<Lifestock> {
     protected int meat;
     protected boolean readyForSlaughter;
     protected boolean isAlive = true;
+    protected int fodderAmount;
+    protected Class<? extends Fodder> fodder;
 
     /**
      * Age all lifestock

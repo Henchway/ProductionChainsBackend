@@ -7,10 +7,9 @@ public class Stonemason extends Labour {
     private static double weight = 5.0;
 
     public Stonemason(Worker worker) {
-
-        this.worker = worker;
-        this.warehouse = worker.getGameTimeline().getWarehouse();
+        super(worker);
     }
+
 
     @Override
     public void produce() {

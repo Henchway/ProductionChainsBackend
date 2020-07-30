@@ -29,6 +29,7 @@ public class Statistics {
     TreeMap<String, Integer> lifestock;
     private long locallyStoredResources;
     private long locallyStoredLifestock;
+    private Map<String, Integer> deathMap;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -57,18 +58,19 @@ public class Statistics {
 
         locallyStoredResources = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
-                .filter(Worker::hasWork)
+                .filter(Worker::isHasWork)
                 .map(worker -> worker.getWork().getLocalResourceStorage().values())
                 .mapToLong(Collection::size)
                 .sum();
 
         locallyStoredLifestock = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
-                .filter(Worker::hasWork)
+                .filter(Worker::isHasWork)
                 .map(worker -> worker.getWork().getLocalLifestockStorage().values())
                 .mapToLong(Collection::size)
                 .sum();
 
+        this.deathMap = gameTimeline.getDeathMap();
         maleWorkersCount = workersCount - femaleWorkersCount;
         generateWorkMap();
         getWarehouseResources();
@@ -155,5 +157,9 @@ public class Statistics {
 
     public long getLocallyStoredLifestock() {
         return locallyStoredLifestock;
+    }
+
+    public Map<String, Integer> getDeathMap() {
+        return deathMap;
     }
 }
