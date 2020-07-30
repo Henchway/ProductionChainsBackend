@@ -1,10 +1,13 @@
 package chains.occupation.occupations;
 
 import chains.materials.Lifestock;
+import chains.materials.Resource;
 import chains.materials.lifestock.Chicken;
 import chains.materials.lifestock.Cow;
 import chains.materials.lifestock.Pig;
 import chains.materials.lifestock.Sheep;
+import chains.materials.raw.Grain;
+import chains.materials.raw.Milk;
 import chains.occupation.type.Labour;
 import chains.utility.Generator;
 import chains.worker.Worker;
@@ -29,25 +32,16 @@ public class Farmer extends Labour {
     public void produce() {
 
         ageLocallyHeldLifestock();
-        addLifestockToLocalStorage(acquireLifestockExceptSheep());
-        warehouse.addLifestockOfSameTypeToWarehouse(acquireSheepLifestock());
-
-        localLifestockStorage.values().forEach(lifestocks -> {
-
-            List<Lifestock> readyForSlaughter = lifestocks
-                    .stream()
-                    .takeWhile(Lifestock::isReadyForSlaughter)
-                    .collect(Collectors.toList());
-
-            lifestocks.removeAll(readyForSlaughter);
-            warehouse.addLifestockOfSameTypeToWarehouse(readyForSlaughter);
-
-        });
+        acquireLifestockExceptSheep();
+        acquireSheepLifestock();
+        addReadyToSlaughterLifestockToWarehouse();
+        milkCows();
+        produceGrain();
 
 
     }
 
-    public List<Lifestock> acquireLifestockExceptSheep() {
+    public void acquireLifestockExceptSheep() {
         List<Lifestock> list = new ArrayList<>();
 
         for (int i = 0; i < (Generator.nextInt(5) + 20) * efficiency; i++) {
@@ -62,15 +56,59 @@ public class Farmer extends Labour {
             list.add(new Pig());
         }
 
-        return list;
+        addLifestockToLocalStorage(list);
     }
 
-    public List<Lifestock> acquireSheepLifestock() {
+    public void acquireSheepLifestock() {
         List<Lifestock> list = new ArrayList<>();
         for (int i = 0; i < (Generator.nextInt(2) + 8) * efficiency; i++) {
             list.add(new Sheep());
         }
-        return list;
+        warehouse.addLifestockOfSameTypeToWarehouse(list);
+    }
+
+    public void addReadyToSlaughterLifestockToWarehouse() {
+
+        localLifestockStorage.values().forEach(lifestocks -> {
+
+            List<Lifestock> readyForSlaughter = lifestocks
+                    .stream()
+                    .takeWhile(Lifestock::isReadyForSlaughter)
+                    .collect(Collectors.toList());
+
+            lifestocks.removeAll(readyForSlaughter);
+            warehouse.addLifestockOfSameTypeToWarehouse(readyForSlaughter);
+
+        });
+
+    }
+
+    public void milkCows() {
+
+        List<Resource> list = new ArrayList<>();
+
+        localLifestockStorage.getOrDefault(Cow.class, Generator.createTreeSet(Lifestock.class))
+                .stream()
+                .map(Cow.class::cast)
+                .forEach(cow -> {
+                    for (int i = 0; i < cow.getMilk(); i++) {
+                        list.add(new Milk());
+                    }
+                });
+
+        warehouse.addResourcesOfSameTypeToWarehouse(list);
+
+    }
+
+    public void produceGrain() {
+
+        List<Resource> list = new ArrayList<>();
+
+        for (int i = 0; i < (10 + Generator.nextInt(10)) * efficiency; i++) {
+            list.add(new Grain());
+        }
+        warehouse.addResourcesOfSameTypeToWarehouse(list);
+
     }
 
 

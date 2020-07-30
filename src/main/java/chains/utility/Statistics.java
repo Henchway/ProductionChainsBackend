@@ -37,8 +37,6 @@ public class Statistics {
 
     public void refreshStatistics() {
         generateWorkerStatistics();
-        getWarehouseResources();
-        getWarehouseLifestock();
     }
 
 
@@ -57,13 +55,6 @@ public class Statistics {
                 .filter(Worker::isMigrated)
                 .count();
 
-//        List<ConcurrentLinkedQueue<Resource>> list = workersStatisticsList.stream()
-//                .filter(Objects::nonNull)
-//                .filter(Worker::hasWork)
-//                .map(worker -> worker.getWork().getLocalResourceStorage().values())
-//                .flatMap(Collection::stream)
-//                .count();
-
         locallyStoredResources = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
                 .filter(Worker::hasWork)
@@ -78,11 +69,10 @@ public class Statistics {
                 .mapToLong(Collection::size)
                 .sum();
 
-
-//        System.out.println(Collections.max(list));
-
         maleWorkersCount = workersCount - femaleWorkersCount;
         generateWorkMap();
+        getWarehouseResources();
+        getWarehouseLifestock();
 
     }
 
@@ -91,7 +81,7 @@ public class Statistics {
      */
     public void generateWorkMap() {
 
-        Map<String, Long> workerMap  = workersStatisticsList.stream()
+        Map<String, Long> workerMap = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
                 .filter(Worker::hasVocation)
                 .map(worker -> worker.getWork().toString())
