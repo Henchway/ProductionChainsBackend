@@ -39,7 +39,7 @@ public class Shepherd extends Labour {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Lifestock> sheepList = retrieveLifestockFromLocalStorage(Sheep.class, (long) localLifestockStorage.getOrDefault(Sheep.class, Generator.createPriorityBlockingQueue(Lifestock.class)).size())
+        List<Lifestock> sheepList = retrieveLifestockFromLocalStorage(Sheep.class, (long) localLifestockStorage.getOrDefault(Sheep.class, Generator.createTreeSet(Lifestock.class)).size())
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(Lifestock::isReadyForSlaughter)
@@ -54,12 +54,11 @@ public class Shepherd extends Labour {
         return list;
     }
 
-
     public List<Resource> produceWool() {
 
         List<Resource> list = new ArrayList<>();
 
-        List<Sheep> sheepList = localLifestockStorage.getOrDefault(Sheep.class, Generator.createPriorityBlockingQueue(Lifestock.class))
+        List<Sheep> sheepList = localLifestockStorage.getOrDefault(Sheep.class, Generator.createTreeSet(Lifestock.class))
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sheep.class::cast)

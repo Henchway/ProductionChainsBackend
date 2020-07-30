@@ -30,37 +30,35 @@ public class Farmer extends Labour {
 
         ageLocallyHeldLifestock();
         addLifestockToLocalStorage(acquireLifestockExceptSheep());
-
-        List<Lifestock> readyForSlaughterLifestock = localLifestockStorage.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .takeWhile(Lifestock::isReadyForSlaughter)
-                .collect(Collectors.toList());
-
-        readyForSlaughterLifestock.forEach(lifestock1 -> {
-                    localLifestockStorage.get(lifestock1.getClass()).remove(lifestock1);
-                }
-        );
-
         warehouse.addLifestockOfSameTypeToWarehouse(acquireSheepLifestock());
 
-        if (readyForSlaughterLifestock.size() > 0) {
-            warehouse.addLifestockOfDifferentTypeToWarehouse(readyForSlaughterLifestock);
-        }
+        localLifestockStorage.values().forEach(lifestocks -> {
+
+            List<Lifestock> readyForSlaughter = lifestocks
+                    .stream()
+                    .takeWhile(Lifestock::isReadyForSlaughter)
+                    .collect(Collectors.toList());
+
+            lifestocks.removeAll(readyForSlaughter);
+            warehouse.addLifestockOfSameTypeToWarehouse(readyForSlaughter);
+
+        });
+
+
     }
 
     public List<Lifestock> acquireLifestockExceptSheep() {
         List<Lifestock> list = new ArrayList<>();
 
-        for (int i = 0; i < (Generator.nextInt(5) + 10) * efficiency; i++) {
+        for (int i = 0; i < (Generator.nextInt(5) + 20) * efficiency; i++) {
             list.add(new Chicken());
         }
 
-        for (int i = 0; i < (Generator.nextInt(2) + 2) * efficiency; i++) {
+        for (int i = 0; i < (Generator.nextInt(2) + 4) * efficiency; i++) {
             list.add(new Cow());
         }
 
-        for (int i = 0; i < (Generator.nextInt(2) + 4) * efficiency; i++) {
+        for (int i = 0; i < (Generator.nextInt(2) + 8) * efficiency; i++) {
             list.add(new Pig());
         }
 
@@ -69,7 +67,7 @@ public class Farmer extends Labour {
 
     public List<Lifestock> acquireSheepLifestock() {
         List<Lifestock> list = new ArrayList<>();
-        for (int i = 0; i < (Generator.nextInt(2) + 4) * efficiency; i++) {
+        for (int i = 0; i < (Generator.nextInt(2) + 8) * efficiency; i++) {
             list.add(new Sheep());
         }
         return list;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Hunter extends Labour {
-    private static double weight = 15.0;
+    private static double weight = 30.0;
     public Hunter(Worker worker) {
 
         this.worker = worker;

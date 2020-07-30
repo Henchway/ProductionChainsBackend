@@ -11,10 +11,10 @@ import chains.worker.Worker;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 
 public class GameTimeline {
@@ -23,7 +23,7 @@ public class GameTimeline {
     private static int yearsPassed = 0;
     private final static int durationOfYear = 50;
     private Statistics statistics;
-    private int population = 1000;
+    private int population = 1;
     private Warehouse warehouse;
 
 
@@ -42,7 +42,7 @@ public class GameTimeline {
 
         ageLifestock();
         workerMigrates(workersList.size());
-        printGCStats();
+//        printGCStats();
 //        System.gc();
 
         long end = System.nanoTime();
@@ -75,36 +75,23 @@ public class GameTimeline {
 
     public void ageLifestock() {
 
-        List<Lifestock> deadLifestock = new ArrayList<>();
+//        List<Lifestock> deadLifestock = new ArrayList<>();
 
-        warehouse.getLifestockStorage().values().forEach(lifestocks -> {
-            lifestocks.forEach(
-                    lifestock1 -> {
-                        lifestock1.age();
-                        if (!lifestock1.isAlive()) {
-                            warehouse.removeLifestockFromLifestockStorage(lifestock1);
-                        }
-                    });
+
+        List<ConcurrentSkipListSet<Lifestock>> list = warehouse.getLifestockStorage()
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        list.forEach(lifestocks -> {
+            lifestocks.forEach(Lifestock::age);
+            List<Lifestock> deadLifestock = lifestocks
+                    .stream()
+                    .filter(lifestock -> !lifestock.isAlive())
+                    .collect(Collectors.toList());
+            lifestocks.removeAll(deadLifestock);
         });
-
-//        List<Class<Lifestock>> lifestock = warehouse.getTypesOfLifestock(Lifestock.class);
-//        lifestock.forEach(lifestockClass -> {
-//            List<Lifestock> list = warehouse.getLifestockStorage()
-//                    .get(lifestockClass)
-//                    .parallelStream()
-//                    .filter(Objects::nonNull)
-//                    .collect(Collectors.toList());
-//
-//            List<Resource> deadLifestock = list
-//                    .parallelStream()
-//                    .filter(Objects::nonNull)
-//                    .filter(lifestock1 -> !lifestock1.isAlive())
-//                    .map(Resource.class::cast)
-//                    .collect(Collectors.toList());
-//
-//            warehouse.removeResourcesFromWarehouse(deadLifestock);
-//
-//        });
 
     }
 

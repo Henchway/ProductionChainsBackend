@@ -38,7 +38,7 @@ public class Tanner extends Craft {
 
         List<Resource> list = new ArrayList<>();
 
-        /**
+        /*
          * To create 5 Leather, it required 1 tannin & 5 hide
          * Efficiency raises the amount of leather retrieved and produced at once
          */

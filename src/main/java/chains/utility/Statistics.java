@@ -9,6 +9,7 @@ import chains.worker.Worker;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -21,12 +22,13 @@ public class Statistics {
     private long maleWorkersCount;
     private long migratedWorkersCount;
     private long currentYear;
-    private TreeMap<String, Integer> workMap;
+    private TreeMap<String, Long> workMap;
     private final GameTimeline gameTimeline;
     private final Warehouse warehouse;
     TreeMap<String, Integer> resources;
     TreeMap<String, Integer> lifestock;
     private long locallyStoredResources;
+    private long locallyStoredLifestock;
 
     public Statistics(GameTimeline gameTimeline) {
         this.gameTimeline = gameTimeline;
@@ -69,6 +71,13 @@ public class Statistics {
                 .mapToLong(Collection::size)
                 .sum();
 
+        locallyStoredLifestock = workersStatisticsList.stream()
+                .filter(Objects::nonNull)
+                .filter(Worker::hasWork)
+                .map(worker -> worker.getWork().getLocalLifestockStorage().values())
+                .mapToLong(Collection::size)
+                .sum();
+
 
 //        System.out.println(Collections.max(list));
 
@@ -82,29 +91,14 @@ public class Statistics {
      */
     public void generateWorkMap() {
 
-        List<String> workList = workersStatisticsList.stream()
+        Map<String, Long> workerMap  = workersStatisticsList.stream()
                 .filter(Objects::nonNull)
                 .filter(Worker::hasVocation)
                 .map(worker -> worker.getWork().toString())
-                .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
 
         workMap = new TreeMap<>();
-
-        if (!workList.isEmpty()) {
-
-            for (String s : workList) {
-
-                if (workMap.containsKey(s)) {
-
-                    workMap.put(s, workMap.get(s) + 1);
-
-                } else {
-
-                    workMap.put(s, 1);
-                }
-
-            }
-        }
+        workMap.putAll(workerMap);
     }
 
     public void getWarehouseResources() {
@@ -112,8 +106,7 @@ public class Statistics {
         ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resources = new ConcurrentHashMap<>(this.warehouse.getResourceStorage());
 
         this.resources = new TreeMap<>();
-        resources
-                .entrySet()
+        resources.entrySet()
                 .stream()
                 .filter(Objects::nonNull)
                 .forEach(classListEntry -> this.resources.put(classListEntry.getKey().getSimpleName(),
@@ -123,11 +116,10 @@ public class Statistics {
 
     public void getWarehouseLifestock() {
 
-        ConcurrentHashMap<Class<? extends Resource>, PriorityBlockingQueue<Lifestock>> lifestock = new ConcurrentHashMap<>(this.warehouse.getLifestockStorage());
+        ConcurrentHashMap<Class<? extends Resource>, ConcurrentSkipListSet<Lifestock>> lifestock = new ConcurrentHashMap<>(this.warehouse.getLifestockStorage());
 
         this.lifestock = new TreeMap<>();
-        lifestock
-                .entrySet()
+        lifestock.entrySet()
                 .stream()
                 .filter(Objects::nonNull)
                 .forEach(classListEntry -> this.lifestock.put(classListEntry.getKey().getSimpleName(),
@@ -159,7 +151,7 @@ public class Statistics {
         return locallyStoredResources;
     }
 
-    public TreeMap<String, Integer> getWorkMap() {
+    public TreeMap<String, Long> getWorkMap() {
         return workMap;
     }
 
@@ -169,5 +161,9 @@ public class Statistics {
 
     public TreeMap<String, Integer> getLifestock() {
         return lifestock;
+    }
+
+    public long getLocallyStoredLifestock() {
+        return locallyStoredLifestock;
     }
 }

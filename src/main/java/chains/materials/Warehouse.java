@@ -1,19 +1,18 @@
 package chains.materials;
 
+import chains.utility.Generator;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class Warehouse {
 
     private final ConcurrentHashMap<Class<? extends Resource>, ConcurrentLinkedQueue<Resource>> resourceStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Class<? extends Lifestock>, PriorityBlockingQueue<Lifestock>> lifestockStorage = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Class<? extends Lifestock>, ConcurrentSkipListSet<Lifestock>> lifestockStorage = new ConcurrentHashMap<>();
 
 
     public void addResourcesOfSameTypeToWarehouse(List<Resource> list) {
@@ -24,7 +23,7 @@ public class Warehouse {
 
     public void addLifestockOfSameTypeToWarehouse(List<Lifestock> list) {
         if (!list.isEmpty()) {
-            lifestockStorage.computeIfAbsent(list.get(0).getClass(), aClass -> new PriorityBlockingQueue<>(100, Comparator.comparingInt(Lifestock::getAge))).addAll(list);
+            lifestockStorage.computeIfAbsent(list.get(0).getClass(), aClass -> new ConcurrentSkipListSet<>(Comparator.comparingInt(Lifestock::getAge).reversed())).addAll(list);
         }
     }
 
@@ -47,7 +46,7 @@ public class Warehouse {
                 .parallelStream()
                 .collect(Collectors.groupingByConcurrent(Lifestock::getClass));
         splitResources.forEach((key, value) -> {
-            lifestockStorage.computeIfAbsent(key, aClass -> new PriorityBlockingQueue<>(100, Comparator.comparingInt(Lifestock::getAge))).addAll(value);
+            lifestockStorage.computeIfAbsent(key, aClass -> new ConcurrentSkipListSet<>(Comparator.comparingInt(Lifestock::getAge).reversed())).addAll(value);
         });
     }
 
@@ -67,30 +66,14 @@ public class Warehouse {
 
     public <T extends Lifestock> List<Lifestock> retrieveLifestockAmountFromWarehouse(Class<T> requestedLifestock, Long amount) {
 
-        List<Lifestock> retrievedLifestock = new ArrayList<>();
-        PriorityBlockingQueue<Lifestock> itemsInMap = lifestockStorage.get(requestedLifestock);
-
-        if (itemsInMap != null) {
-            for (int i = 0; i < amount; i++) {
-                retrievedLifestock.add(itemsInMap.poll());
-            }
-        }
+        ConcurrentSkipListSet<Lifestock> itemsInMap = lifestockStorage.getOrDefault(requestedLifestock, Generator.createConcurrentSkipListSet(Lifestock.class));
+        List<Lifestock> retrievedLifestock = itemsInMap.stream()
+                .filter(Objects::nonNull)
+                .limit(amount)
+                .collect(Collectors.toList());
+        itemsInMap.removeAll(retrievedLifestock);
 
         return retrievedLifestock;
-    }
-
-    public <T extends Lifestock> List<Lifestock> retrieveLifestock(Class<T> requestedResource, Long amount) {
-
-        List<Lifestock> list = new ArrayList<>();
-        PriorityBlockingQueue<Lifestock> queue = lifestockStorage.get(requestedResource);
-
-        if (queue != null) {
-            for (int i = 0; i < amount; i++) {
-                list.add(queue.poll());
-            }
-        }
-
-        return list;
     }
 
 
@@ -113,7 +96,7 @@ public class Warehouse {
 
     public void removeLifestockFromLifestockStorage(Lifestock lifestock) {
 
-        resourceStorage.get(lifestock.getClass()).remove(lifestock);
+        lifestockStorage.get(lifestock.getClass()).remove(lifestock);
     }
 
     public void removeResourcesFromWarehouse(List<Resource> list) {
@@ -152,7 +135,7 @@ public class Warehouse {
         return resourceStorage;
     }
 
-    public ConcurrentHashMap<Class<? extends Lifestock>, PriorityBlockingQueue<Lifestock>> getLifestockStorage() {
+    public ConcurrentHashMap<Class<? extends Lifestock>, ConcurrentSkipListSet<Lifestock>> getLifestockStorage() {
         return lifestockStorage;
     }
 }

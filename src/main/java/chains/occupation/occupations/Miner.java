@@ -51,7 +51,6 @@ public class Miner extends Labour {
 
     }
 
-
     @Override
     public void acquireTool() {
 

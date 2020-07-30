@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -187,8 +188,12 @@ public class Generator {
         return new ConcurrentLinkedQueue<>();
     }
 
-    public static <T> PriorityBlockingQueue<T> createPriorityBlockingQueue(Class<T> clazz) {
-        return new PriorityBlockingQueue<>();
+    public static <T extends Comparable> ConcurrentSkipListSet<T> createConcurrentSkipListSet(Class<T> clazz) {
+        return new ConcurrentSkipListSet<>();
+    }
+
+    public static <T extends Comparable> TreeSet<T> createTreeSet(Class<T> clazz) {
+        return new TreeSet<>();
     }
 
 

@@ -2,8 +2,14 @@ package chains.materials.lifestock;
 
 import chains.materials.Lifestock;
 import chains.utility.Generator;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-
+@Getter
+@Setter
+@Builder
 public class Chicken extends Lifestock {
 
     public Chicken() {
