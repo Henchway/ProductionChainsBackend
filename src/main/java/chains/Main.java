@@ -25,21 +25,4 @@ public class Main {
             System.out.println(beanName);
         }
     }
-
-
-    @Bean
-    public Warehouse warehouse() {
-        return new Warehouse();
-    }
-
-    @Bean
-    public GameTimeline gameTimeline(Warehouse warehouse) {
-        return new GameTimeline(warehouse);
-    }
-
-    @Bean
-    public Statistics statistics(GameTimeline gameTimeline) {
-        return new Statistics(gameTimeline);
-    }
-
 }

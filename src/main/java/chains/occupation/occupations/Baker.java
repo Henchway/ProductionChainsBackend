@@ -3,7 +3,6 @@ package chains.occupation.occupations;
 import chains.materials.Resource;
 import chains.materials.intermediate.Flour;
 import chains.materials.product.Bread;
-import chains.materials.raw.Grain;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;
@@ -13,7 +12,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter

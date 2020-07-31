@@ -3,7 +3,6 @@ package chains.occupation.occupations;
 import chains.materials.Resource;
 import chains.materials.intermediate.Flour;
 import chains.materials.raw.Grain;
-import chains.occupation.Work;
 import chains.occupation.type.Craft;
 import chains.utility.Generator;
 import chains.worker.Worker;

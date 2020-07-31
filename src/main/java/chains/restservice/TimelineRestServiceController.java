@@ -29,7 +29,6 @@ public class TimelineRestServiceController {
     @PostMapping("/start")
     public ResponseEntity<Object> startTimeline() {
 
-        gameTimeline.setStatistics(statistics);
         gameTimeline.startPopulation();
         createTimer();
         return new ResponseEntity<>(HttpStatus.OK);
@@ -47,13 +46,13 @@ public class TimelineRestServiceController {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                GameTimeline.setYearsPassed(GameTimeline.getYearsPassed() + 1);
+                gameTimeline.setYearsPassed(gameTimeline.getYearsPassed() + 1);
                 gameTimeline.processNewYear();
             }
         };
 
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, GameTimeline.getDurationOfYear());
+        timer.scheduleAtFixedRate(task, 0, gameTimeline.getDurationOfYear());
 
     }
 

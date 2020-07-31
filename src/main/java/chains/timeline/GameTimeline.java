@@ -7,10 +7,10 @@ import chains.materials.product.Bread;
 import chains.materials.raw.Meat;
 import chains.materials.raw.Milk;
 import chains.utility.Generator;
-import chains.utility.Statistics;
 import chains.worker.Worker;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -21,16 +21,15 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@Component
 public class GameTimeline {
 
     private final Set<Worker> workersList;
-    private static int yearsPassed = 0;
-    private final static int durationOfYear = 200;
-    private Statistics statistics;
+    private int yearsPassed = 0;
+    private int durationOfYear = 200;
     private int population = 20;
     private Warehouse warehouse;
     private final ConcurrentHashMap<String, Integer> deathMap = new ConcurrentHashMap<>();
-
 
     public GameTimeline(Warehouse warehouse) {
         this.warehouse = warehouse;
@@ -48,7 +47,7 @@ public class GameTimeline {
         ageLifestock();
         feedLifestock();
         workerMigrates(workersList.size());
-        printGCStats();
+//        printGCStats();
 //        System.gc();
 
         long end = System.nanoTime();
@@ -66,6 +65,7 @@ public class GameTimeline {
     }
 
     public void setInitialResources() {
+
 
         List<Resource> meat = new ArrayList<>();
         List<Resource> milk = new ArrayList<>();
@@ -146,45 +146,12 @@ public class GameTimeline {
                 + garbageCollectionTime);
     }
 
-
-    public void setStatistics(Statistics statistics) {
-        this.statistics = statistics;
-    }
-
-    public static int getYearsPassed() {
-        return yearsPassed;
-    }
-
-    public static void setYearsPassed(int years) {
-        yearsPassed = years;
-    }
-
-    public static int getDurationOfYear() {
-        return durationOfYear;
-    }
-
-    public int getPopulation() {
-        return population;
-    }
-
-    public void setPopulation(int population) {
-        this.population = population;
-    }
-
-    public Statistics getStatistics() {
-        return statistics;
-    }
-
     public void addWorkerToList(Worker worker) {
         workersList.add(worker);
     }
 
     public void removeWorkerFromList(Worker worker) {
         workersList.remove(worker);
-    }
-
-    public Set<Worker> getWorkersList() {
-        return workersList;
     }
 
     public void workerMigrates(int workerCount) {
@@ -199,14 +166,6 @@ public class GameTimeline {
 
         }
 
-    }
-
-    public Warehouse getWarehouse() {
-        return warehouse;
-    }
-
-    public void setWarehouse(Warehouse warehouse) {
-        this.warehouse = warehouse;
     }
 
     public void addDeathToMap(String reason) {
