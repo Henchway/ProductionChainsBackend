@@ -5,7 +5,6 @@ import chains.materials.raw.Grain;
 import chains.utility.Generator;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter

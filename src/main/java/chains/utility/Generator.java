@@ -1,13 +1,10 @@
 package chains.utility;
 
-import chains.materials.Food;
 import chains.materials.Lifestock;
 import chains.occupation.Work;
-import chains.occupation.occupations.*;
 import chains.worker.Worker;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
-import org.apache.logging.log4j.spi.CopyOnWrite;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -21,8 +18,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.PriorityBlockingQueue;
 
 public class Generator {
 
