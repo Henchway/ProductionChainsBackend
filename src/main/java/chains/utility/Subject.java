@@ -2,6 +2,7 @@ package chains.utility;
 
 import java.util.ArrayList;
 
+@Deprecated
 public abstract class Subject {
 
 

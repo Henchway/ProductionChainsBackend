@@ -152,7 +152,6 @@ public class Worker {
 
             Worker match = gameTimeline.getWorkersList()
                     .stream()
-                    .unordered()
                     .filter(worker -> !worker.hasPartner()
                             && worker.isAlive
                             && Math.abs(worker.getHealth() - worker.getAge()) > 10 // Partners on the brink of death won't be chosen

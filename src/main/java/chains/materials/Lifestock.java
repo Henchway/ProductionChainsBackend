@@ -16,7 +16,7 @@ public abstract class Lifestock implements Resource, Comparable<Lifestock> {
     protected int fodderAmount;
     protected Class<? extends Fodder> fodder;
 
-    /**
+    /*
      * Age all lifestock
      */
     public void age() {

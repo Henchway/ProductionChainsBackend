@@ -154,7 +154,7 @@ public abstract class Work {
 
     /*
    Either animals are fed or they lose Meat
- */
+    */
     public void feedLifestock() {
         localLifestockStorage.values().forEach(lifestocks -> {
             Set<Lifestock> starvedLifestock = new HashSet<>();

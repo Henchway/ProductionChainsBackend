@@ -3,6 +3,7 @@ package chains.timeline;
 import chains.materials.Lifestock;
 import chains.materials.Resource;
 import chains.materials.Warehouse;
+import chains.materials.product.Bread;
 import chains.materials.raw.Meat;
 import chains.materials.raw.Milk;
 import chains.utility.Generator;
@@ -25,9 +26,9 @@ public class GameTimeline {
 
     private final Set<Worker> workersList;
     private static int yearsPassed = 0;
-    private final static int durationOfYear = 50;
+    private final static int durationOfYear = 200;
     private Statistics statistics;
-    private int population = 1;
+    private int population = 20;
     private Warehouse warehouse;
     private final ConcurrentHashMap<String, Integer> deathMap = new ConcurrentHashMap<>();
 
@@ -48,7 +49,7 @@ public class GameTimeline {
         ageLifestock();
         feedLifestock();
         workerMigrates(workersList.size());
-//        printGCStats();
+        printGCStats();
 //        System.gc();
 
         long end = System.nanoTime();
@@ -69,13 +70,16 @@ public class GameTimeline {
 
         List<Resource> meat = new ArrayList<>();
         List<Resource> milk = new ArrayList<>();
+        List<Resource> bread = new ArrayList<>();
         for (int i = 0; i < 500 * population; i++) {
             meat.add(new Meat());
             milk.add(new Milk());
+            bread.add(new Bread());
         }
 
         warehouse.addResourcesOfSameTypeToWarehouse(meat);
         warehouse.addResourcesOfSameTypeToWarehouse(milk);
+        warehouse.addResourcesOfSameTypeToWarehouse(bread);
 
     }
 
@@ -103,8 +107,8 @@ public class GameTimeline {
             lifestocks.forEach(lifestock -> {
                 for (int i = 0; i < lifestock.getFodderAmount(); i++) {
                     try {
-                        warehouse.getResourceStorage().get(lifestock.getFodder()).remove();
-                    } catch (Exception e) {
+                        warehouse.getResourceStorage().getOrDefault(lifestock.getFodder(), Generator.createConcurrentLinkedQueue(Resource.class)).remove();
+                    } catch (NoSuchElementException e) {
                         if (lifestock.getMeat() > 0) {
                             lifestock.setMeat(lifestock.getMeat() - 1);
                         } else {
@@ -114,7 +118,6 @@ public class GameTimeline {
                 }
             });
         });
-
     }
 
 

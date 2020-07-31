@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 public class Butcher extends Craft {
+
     private static double weight = Farmer.getWeight() * 0.5;
 
     public Butcher(Worker worker) {
