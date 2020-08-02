@@ -5,6 +5,7 @@ import chains.materials.Resource;
 import chains.materials.Warehouse;
 import chains.timeline.GameTimeline;
 import chains.worker.Worker;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -15,7 +16,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 
-@Component
 public class Statistics {
 
     private HashSet<Worker> workersStatisticsList;
@@ -33,9 +33,9 @@ public class Statistics {
     private long locallyStoredLifestock;
     private Map<String, Integer> deathMap;
 
-    public Statistics(GameTimeline gameTimeline) {
+    public Statistics(GameTimeline gameTimeline, Warehouse warehouse) {
         this.gameTimeline = gameTimeline;
-        this.warehouse = this.gameTimeline.getWarehouse();
+        this.warehouse = warehouse;
     }
 
     public void refreshStatistics() {
